@@ -1,251 +1,320 @@
+// Использование SCSS модуля с переменными из файла variables.scss
+// Префикс '$' позволяет обращаться к переменным напрямую без указания namespace
 @use '../styles/abstracts/variables' as *;
 
+// Стили для основного контейнера layout
 .layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #f4f7f8;
+  display: flex; // Установка flexbox модели для расположения дочерних элементов
+  flex-direction: column; // Вертикальное направление flex-контейнера (сверху вниз)
+  min-height: 100vh; // Минимальная высота равна высоте viewport (окна браузера)
+  background: #f4f7f8; // Цвет фона layout (светло-серый с голубоватым оттенком)
 }
 
-/* ЕДИНЫЙ контейнер */
+/* ЕДИНЫЙ контейнер для центрирования контента */
 .container {
-  max-width: $breakpoint-xl;
-  width: 100%;
-  margin: auto;
-  padding: $space-sm;
+  max-width: $breakpoint-xl; // Максимальная ширина из переменной (скорее всего 1200px)
+  width: 100%; // Ширина 100% от родительского контейнера
+  margin: auto; // Автоматические отступы по бокам для центрирования
+  padding: $space-sm; // Внутренние отступы из переменной (скорее всего 16px)
 }
 
-/* HEADER */
+/* Стили для HEADER (шапки сайта) */
 .header {
-  width: 100%;
-  background-color: $color-dark-1;
-  min-height: 72px;
-  display: flex;
-  align-items: center;
+  width: 100%; // Ширина 100% от родительского контейнера
+  background-color: $color-dark-1; // Темный цвет фона из переменных
+  min-height: 72px; // Минимальная высота header (стандартная высота навигации)
+  display: flex; // Flexbox для выравнивания внутреннего контента
+  align-items: center; // Вертикальное выравнивание по центру
 }
 
+// Внутренний контейнер header
 .headerInner {
-  @extend .container;
-  /* <-- одинаковая ширина */
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: $space-md;
-  min-height: 72px;
+  @extend .container; // Наследование стилей от класса .container (ширина, отступы)
+  /* <-- одинаковая ширина как у других контейнеров */
+  display: flex; // Flexbox для расположения логотипа и навигации
+  flex-wrap: wrap; // Разрешение переноса элементов на новую строку
+  justify-content: space-between; // Распределение пространства между элементами
+  align-items: center; // Вертикальное выравнивание по центру
+  gap: $space-md; // Расстояние между flex-элементами (скорее всего 24px)
+  min-height: 72px; // Минимальная высота (совпадает с .header)
 
+  // Блок с логотипом и названием
   .logoBox {
-    font-weight: bold;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    gap: $space-xs;
-    margin-right: $space-lg;
-    cursor: pointer;
+    font-weight: bold; // Жирное начертание шрифта
+    font-size: 24px; // Размер шрифта 24px
+    display: flex; // Flexbox для расположения иконки и текста
+    align-items: center; // Вертикальное выравнивание по центру
+    gap: $space-xs; // Небольшое расстояние между иконкой и текстом (скорее всего 8px)
+    margin-right: $space-lg; // Правый отступ (скорее всего 32px)
+    cursor: pointer; // Изменение курсора при наведении (указатель)
 
+    // Стили для иконки логотипа
     .logo {
-      width: 32px;
-      height: 32px;
-      color: $color-yellow-1;
+      width: 32px; // Ширина иконки
+      height: 32px; // Высота иконки
+      color: $color-yellow-1; // Цвет иконки (желтый из переменных)
     }
 
+    // Текст логотипа
     span {
-      color: $text-color-inverse;
+      color: $text-color-inverse; // Цвет текста (светлый для темного фона)
     }
   }
 
+  // Кнопка бургер-меню (для мобильных устройств)
   .burger {
-    display: none;
-    background: none;
-    border: none;
-    color: $color-white;
-    cursor: pointer;
+    display: none; // По умолчанию скрыта (отображается только на мобильных)
+    background: none; // Прозрачный фон
+    border: none; // Без рамки
+    color: $color-white; // Белый цвет иконки
+    cursor: pointer; // Курсор-указатель при наведении
   }
 
+  // Контейнер навигационного меню
   .navigate {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: $space-lg;
-    font-size: $font-size-lg;
-    font-weight: bold;
+    display: flex; // Flexbox для расположения пунктов меню
+    justify-content: space-between; // Равномерное распределение пунктов
+    align-items: center; // Вертикальное выравнивание по центру
+    gap: $space-lg; // Расстояние между пунктами меню (скорее всего 32px)
+    font-size: $font-size-lg; // Размер шрифта из переменных (скорее всего 18px)
+    font-weight: bold; // Жирное начертание шрифта
 
+    // Отдельный пункт меню
     .item {
-      padding: $space-sm;
-      color: $text-color-inverse;
-      cursor: pointer;
+      padding: $space-sm; // Внутренние отступы (скорее всего 16px)
+      color: $text-color-inverse; // Цвет текста (светлый)
+      cursor: pointer; // Курсор-указатель при наведении
 
-      transition: color .2s ease-out;
+      transition: color .2s ease-out; // Плавное изменение цвета за 0.2 секунды
 
+      // Состояния при наведении и активном состоянии
       &:hover,
       &.active {
-        color: $color-yellow-1;
+        color: $color-yellow-1; // Изменение цвета на желтый
       }
 
+      // Убираем правый отступ у последнего пункта меню
       &:last-child {
         padding-right: 0;
       }
     }
   }
 
+  // Медиа-запрос для планшетов и небольших ноутбуков
   @media (max-width: $breakpoint-lg) {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: column; // Вертикальное расположение элементов
+    align-items: flex-start; // Выравнивание по левому краю
 
     .navigate {
-      width: 100%;
+      width: 100%; // Ширина 100% для растягивания на всю доступную ширину
 
+      // Убираем левый отступ у первого пункта меню
       .item:first-child {
         padding-left: 0;
       }
     }
   }
 
+  // Медиа-запрос для мобильных устройств
   @media (max-width: $breakpoint-md) {
-    flex-direction: row;
-    align-items: center;
+    flex-direction: row; // Горизонтальное расположение элементов
+    align-items: center; // Выравнивание по центру
 
+    // Показываем кнопку бургер-меню на мобильных
     .burger {
       display: block;
     }
 
+    // Стили для мобильного навигационного меню
     .navigate {
-      position: absolute;
-      z-index: 100;
-      top: 72px;
-      right: 0;
-      flex-direction: column;
-      background: $color-grey-1;
-      padding: $space-xs;
-      gap: $space-xs;
-      width: 200px;
+      position: absolute; // Абсолютное позиционирование относительно header
+      z-index: 100; // Высокий z-index для отображения поверх других элементов
+      top: 72px; // Расположение сразу под header (72px - высота header)
+      right: 0; // Прижатие к правому краю
+      flex-direction: column; // Вертикальное расположение пунктов меню
+      background: $color-grey-1; // Цвет фона меню
+      padding: $space-xs; // Небольшие внутренние отступы (скорее всего 8px)
+      gap: $space-xs; // Небольшое расстояние между пунктами
+      width: 200px; // Фиксированная ширина меню
 
-      opacity: 0;
-      transform: translateX(20px);
-      pointer-events: none;
-      transition: all 0.3s ease;
+      // Начальное состояние для анимации (скрытое)
+      opacity: 0; // Полная прозрачность
+      transform: translateX(20px); // Сдвиг вправо на 20px
+      pointer-events: none; // Отключение взаимодействия с элементами
+      transition: all 0.3s ease; // Плавная анимация всех свойств за 0.3 секунды
 
+      // Стили пунктов меню для мобильной версии
       .item {
-        color: $secondary-color;
-        transition: color 0.2s ease;
+        color: $secondary-color; // Цвет текста (вторичный из переменных)
+        transition: color 0.2s ease; // Плавное изменение цвета
 
+        // Состояния при наведении и активном состоянии
         &:hover,
         &.active {
-          color: $color-yellow-2;
+          color: $color-yellow-2; // Другой оттенок желтого
         }
       }
 
+      // Класс для открытого состояния меню
       &.open {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto;
+        opacity: 1; // Полная непрозрачность
+        transform: translateY(0); // Возврат в исходное положение
+        pointer-events: auto; // Включение взаимодействия с элементами
       }
     }
   }
-
 }
 
-/* CONTENT */
+/* Стили для CONTENT (основной контентной области) */
 .content {
-  @extend .container;
-  /* <-- одинаковая ширина */
-  flex: 1;
-  margin-top: $space-md;
-  margin-bottom: 50px;
+  @extend .container; // Наследование стилей от класса .container
+  /* <-- одинаковая ширина как у header и footer */
+  flex: 1; // Flex-grow: 1 - занимает все доступное пространство между header и footer
+  margin-top: $space-md; // Верхний отступ (скорее всего 24px)
+  margin-bottom: 50px; // Нижний отступ 50px (фиксированное значение)
 }
 
-/* FOOTER */
+/* Стили для FOOTER (подвала сайта) */
 .footer {
-  width: 100%;
-  background-color: $color-grey-1;
+  width: 100%; // Ширина 100% от родительского контейнера
+  background-color: $color-grey-1; // Цвет фона (серый из переменных)
 }
 
+// Внутренний контейнер footer
 .footerInner {
-  @extend .container;
-  /* <-- одинаковая ширина */
-  padding: 0;
-  display: grid;
-  grid-template-columns: auto 380px;
-  gap: $space-lg;
+  @extend .container; // Наследование стилей от класса .container
+  /* <-- одинаковая ширина как у других контейнеров */
+  padding: 0; // Убираем внутренние отступы (переопределение .container)
+  display: grid; // CSS Grid для расположения колонок
+  grid-template-columns: auto 380px; // Две колонки: автоширина и фиксированная 380px
+  gap: $space-lg; // Расстояние между колонками (скорее всего 32px)
 
-
+  // Основная секция footer (левая колонка)
   .main {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: $space-lg;
-    padding: $space-lg $space-sm;
-    color: $color-grey-3;
+    display: flex; // Flexbox для расположения контента
+    flex-direction: column; // Вертикальное направление
+    justify-content: space-between; // Распределение пространства между элементами
+    gap: $space-lg; // Расстояние между элементами (скорее всего 32px)
+    padding: $space-lg $space-sm; // Внутренние отступы (32px сверху/снизу, 16px слева/справа)
+    color: $color-grey-3; // Цвет текста (серый из переменных)
 
+    // Блок с информацией
     .info {
       h2 {
-        text-transform: uppercase;
-        margin-bottom: $space-lg;
+        text-transform: uppercase; // Преобразование текста в верхний регистр
+        margin-bottom: $space-lg; // Нижний отступ (скорее всего 32px)
       }
 
       p {
-        margin-top: $space-xs;
+        margin-top: $space-xs; // Верхний отступ у параграфов (скорее всего 8px)
       }
 
       a {
-        font-weight: bold;
-        color: $color-yellow-1;
-        text-decoration: none;
-        transition: color .2s ease-out;
+        font-weight: bold; // Жирное начертание ссылок
+        color: $color-yellow-1; // Желтый цвет ссылок
+        text-decoration: none; // Убираем подчеркивание
+        transition: color .2s ease-out; // Плавное изменение цвета
 
+        // Состояние при наведении на ссылку
         &:hover {
-          color: $color-yellow-2;
+          color: $color-yellow-2; // Изменение цвета на другой оттенок желтого
         }
       }
     }
-
   }
 
-
+  // Секция контактов (правая колонка)
   .contacts {
-    background-color: $primary-color;
-    padding: $space-lg;
-    color: $text-color-inverse;
+    background-color: $primary-color; // Цвет фона (основной цвет из переменных)
+    padding: $space-lg; // Внутренние отступы (скорее всего 32px)
+    color: $text-color-inverse; // Цвет текста (светлый для темного фона)
 
     h4 {
-      font-size: $font-size-xl;
-      text-transform: uppercase;
-      padding-bottom: $space-xs;
-      border-bottom: 2px solid $color-white;
+      font-size: $font-size-xl; // Крупный размер шрифта (скорее всего 24px)
+      text-transform: uppercase; // Текст в верхнем регистре
+      padding-bottom: $space-xs; // Нижний внутренний отступ (скорее всего 8px)
+      border-bottom: 2px solid $color-white; // Белая линия под заголовком
     }
 
     ul {
-      padding: $space-sm $space-lg;
-      display: flex;
-      flex-direction: column;
-      gap: $space-xs;
+      padding: $space-sm $space-lg; // Внутренние отступы (16px сверху/снизу, 32px слева/справа)
+      display: flex; // Flexbox для расположения элементов списка
+      flex-direction: column; // Вертикальное направление
+      gap: $space-xs; // Расстояние между элементами списка (скорее всего 8px)
     }
 
     a {
-      color: $text-color-inverse;
-      text-decoration: none;
-      font-size: $font-size-lg;
-      transition: color .2s ease-out;
+      color: $text-color-inverse; // Цвет ссылок (светлый)
+      text-decoration: none; // Убираем подчеркивание
+      font-size: $font-size-lg; // Размер шрифта (скорее всего 18px)
+      transition: color .2s ease-out; // Плавное изменение цвета
 
+      // Состояние при наведении на ссылку
       &:hover {
-        color: $color-yellow-1;
+        color: $color-yellow-1; // Изменение цвета на желтый
       }
     }
 
     p {
-      text-transform: uppercase;
-      text-align: right;
-      font-weight: bold;
+      text-transform: uppercase; // Текст в верхнем регистре
+      text-align: right; // Выравнивание по правому краю
+      font-weight: bold; // Жирное начертание
     }
   }
 
+  // Медиа-запрос для мобильных устройств
   @media (max-width: $breakpoint-md) {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+    display: flex; // Меняем grid на flexbox
+    flex-direction: column; // Вертикальное расположение колонок
+    gap: 0; // Убираем расстояние между колонками
 
     .contacts {
-      padding: $space-lg $space-sm;
+      padding: $space-lg $space-sm; // Изменяем отступы для мобильных (32px сверху/снизу, 16px слева/справа)
     }
   }
 }
+
+
+
+
+/*
+ПОЯСНЕНИЯ К КОММЕНТАРИЯМ В КОДЕ:
+
+1. СТРУКТУРА ФАЙЛА СТИЛЕЙ:
+   - Файл организован по методологии БЭМ (Block Element Modifier)
+   - Каждый крупный блок (.layout, .header, .content, .footer) имеет свои элементы
+   - Используется SCSS синтаксис с вложенностью и наследованием
+
+2. ПЕРЕМЕННЫЕ И МОДУЛЬНОСТЬ:
+   - Используется система переменных для цветов, размеров, отступов
+   - @use для импорта переменных обеспечивает модульность и переиспользование
+   - Префикс 'as *' позволяет использовать переменные без namespace
+
+3. RESPONSIVE DESIGN:
+   - Реализована адаптивная верстка с двумя breakpoint'ами (lg и md)
+   - На мобильных устройствах навигация превращается в бургер-меню
+   - Grid и flexbox меняют направление и размеры на разных экранах
+
+4. ТЕХНИКИ ВЕРСТКИ:
+   - Flexbox для одномерного расположения элементов
+   - CSS Grid для двухколоночной структуры в footer
+   - Абсолютное позиционирование для выпадающего меню
+   - CSS transitions для плавных анимаций
+
+5. ДОСТУПНОСТЬ И UX:
+   - Плавные переходы (transitions) улучшают пользовательский опыт
+   - Изменение курсора на pointer для интерактивных элементов
+   - Состояния hover и active для обратной связи
+
+6. ОРГАНИЗАЦИЯ КОДА:
+   - Комментарии разделяют крупные блоки кода
+   - Медиа-запросы расположены внутри соответствующих блоков
+   - Используется наследование через @extend для единообразия контейнеров
+
+7. СЕМАНТИЧЕСКИЕ КЛАССЫ:
+   - Имена классов отражают их назначение (.logoBox, .navigate, .contacts)
+   - Модификаторы (.open) изменяют состояние элементов
+
+Комментарии сохранены на русском языке в соответствии с требованиями,
+без изменения логики и структуры исходного кода SCSS.
+*/

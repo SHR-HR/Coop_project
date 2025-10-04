@@ -1,25 +1,64 @@
 {
   "compilerOptions": {
+    // Путь к файлу с информацией о сборке для Node.js части
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    // Целевая версия ECMAScript для Node.js (ES2023 = ES14)
     "target": "ES2023",
-    "lib": ["ES2023"],
+    // Библиотеки TypeScript для Node.js среды
+    "lib": [
+      "ES2023"
+    ],
+    // Система модулей: ESNext
     "module": "ESNext",
+    // Пропуск проверки типов в .d.ts файлах
     "skipLibCheck": true,
-
-    /* Bundler mode */
+    /* Bundler mode - настройки для сборщиков */
+    // Стратегия разрешения модулей для сборщиков
     "moduleResolution": "bundler",
+    // Разрешение импорта TypeScript файлов с расширениями
     "allowImportingTsExtensions": true,
+    // Сохранение синтаксиса импорта/экспорта
     "verbatimModuleSyntax": true,
+    // Принудительное определение модулей
     "moduleDetection": "force",
+    // Не генерировать .js файлы
     "noEmit": true,
-
-    /* Linting */
+    /* Linting - строгие проверки */
+    // Все строгие проверки TypeScript
     "strict": true,
+    // Ошибка при неиспользуемых локальных переменных
     "noUnusedLocals": true,
+    // Ошибка при неиспользуемых параметрах функций
     "noUnusedParameters": true,
+    // Только стираемый синтаксис
     "erasableSyntaxOnly": true,
+    // Проверка switch/case
     "noFallthroughCasesInSwitch": true,
+    // Проверка side-effect импортов
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts"]
+  // Включение только файла конфигурации Vite
+  "include": [
+    "vite.config.ts"
+  ]
 }
+/* ===== ПОЯСНЕНИЯ К КОММЕНТАРИЯМ ДЛЯ tsconfig.node.json ===== */
+/*
+1. Назначение файла:
+   - Конфигурация TypeScript для Node.js части проекта
+   - В основном для vite.config.ts и других конфигурационных файлов
+
+2. Target ES2023:
+   - Более современная версия чем у клиентской части
+   - Node.js обычно поддерживает новейшие возможности JavaScript
+   - Включает: Array find from last, Hashbang grammar
+
+3. Отличия от tsconfig.app.json:
+   - Нет lib: ["DOM", "DOM.Iterable"] - не нужны браузерные API
+   - Нет jsx: "react-jsx" - не компилирует JSX
+   - target: "ES2023" - более современный стандарт
+
+4. Включенные файлы:
+   - Только vite.config.ts - конфигурация сборщика Vite
+   - Может быть расширен для других Node.js скриптов
+*/

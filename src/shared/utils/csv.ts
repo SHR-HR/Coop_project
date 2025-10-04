@@ -1,7 +1,9 @@
+// Импорт типа UserStatistic для типизации данных пользователя
 import type { UserStatistic } from "../types/types";
 
 /**
- * Параметры экспорта CSV.
+ * Интерфейс параметров экспорта CSV.
+ * Определяет настройки для кастомизации процесса экспорта
  */
 export type CsvOptions = {
     /** Если true — выбрать разделитель по локали: ';' для ru, ',' иначе. По умолчанию true. */
@@ -21,99 +23,213 @@ export type CsvOptions = {
 };
 
 /**
+ * Основная функция экспорта статистики пользователей в CSV файл
  * Экспортирует текущий список пользователей в CSV.
  * Колонки: name, completed, inWork, failed, total, doneRate(%)
  */
+// Функция принимает массив статистики пользователей и опциональные настройки экспорта
 export function exportUsersStatToCSV(items: UserStatistic[], opts: CsvOptions = {}) {
+    // Деструктуризация параметров с значениями по умолчанию
     const {
-        localeAwareDelimiter = true,
-        delimiter: forcedDelimiter,
-        addBOM = true,
-        addTotalsRow = true,
-        headers = "auto",
-        lineBreak = "\r\n",
-        filenameBase,
+        localeAwareDelimiter = true,  // Автоматический выбор разделителя по локали
+        delimiter: forcedDelimiter,   // Принудительный разделитель (если указан)
+        addBOM = true,                // Добавлять BOM для Excel на Windows
+        addTotalsRow = true,          // Добавлять строку с итогами
+        headers = "auto",             // Автоматический выбор заголовков по языку
+        lineBreak = "\r\n",           // Разделитель строк для Excel (CRLF)
+        filenameBase,                 // Базовое имя файла (опционально)
     } = opts;
 
+    // Определение языка пользователя для локализации
+    // navigator?.language - безопасный доступ к языку браузера
+    // toLowerCase().startsWith("ru") - проверка на русский язык
     const isRu = (navigator?.language || "").toLowerCase().startsWith("ru");
+
+    // Определение разделителя: принудительный или автоматический по локали
+    // forcedDelimiter ?? - оператор нулевого слияния, использует forcedDelimiter если он задан
+    // localeAwareDelimiter ? (isRu ? ";" : ",") : "," - логика автоматического выбора
     const delimiter = forcedDelimiter ?? (localeAwareDelimiter ? (isRu ? ";" : ",") : ",");
 
+    // Определение заголовков столбцов в зависимости от настроек
     const header = Array.isArray(headers)
-        ? headers
+        ? headers  // Если передан массив - используем его
         : headers === "ru" || (headers === "auto" && isRu)
-            ? ["Имя", "Выполнено", "В работе", "Просрочено", "Всего", "Готово(%)"]
-            : ["name", "completed", "inWork", "failed", "total", "doneRate(%)"];
+            ? ["Имя", "Выполнено", "В работе", "Просрочено", "Всего", "Готово(%)"]  // Русские заголовки
+            : ["name", "completed", "inWork", "failed", "total", "doneRate(%)"];    // Английские заголовки
 
+    // Создание массива строк для CSV
     const rows: string[][] = [
-        header,
+        header,  // Первая строка - заголовки
+        // Преобразование каждого пользователя в строку CSV
         ...items.map((u) => {
+            // Вычисление общего количества задач
             const total = u.completedTasks + u.inWorkTasks + u.failedTasks;
+            // Вычисление процента выполненных задач
             const rate = total ? Math.round((u.completedTasks / total) * 100) : 0;
+            // Возврат массива значений с экранированием
             return [
-                escapeCSV(u.name, delimiter),
-                String(u.completedTasks),
-                String(u.inWorkTasks),
-                String(u.failedTasks),
-                String(total),
-                String(rate),
+                escapeCSV(u.name, delimiter),        // Имя с экранированием
+                String(u.completedTasks),           // Выполненные задачи
+                String(u.inWorkTasks),              // Задачи в работе
+                String(u.failedTasks),              // Просроченные задачи
+                String(total),                      // Всего задач
+                String(rate),                       // Процент выполнения
             ];
         }),
     ];
 
+    // Добавление строки с итогами если включено
     if (addTotalsRow) {
+        // Инициализация переменных для сумм
         let completed = 0,
             inWork = 0,
             failed = 0;
+        // Вычисление сумм по всем пользователям
         for (const u of items) {
-            completed += u.completedTasks;
-            inWork += u.inWorkTasks;
-            failed += u.failedTasks;
+            completed += u.completedTasks;  // Сумма выполненных
+            inWork += u.inWorkTasks;        // Сумма в работе
+            failed += u.failedTasks;        // Сумма просроченных
         }
+        // Общее количество всех задач
         const totalAll = completed + inWork + failed;
+        // Общий процент выполненных задач
         const rateAll = totalAll ? Math.round((completed / totalAll) * 100) : 0;
 
+        // Добавление строки итогов с локализованной меткой
         rows.push([
-            isRu ? "ИТОГО" : "TOTAL",
-            String(completed),
-            String(inWork),
-            String(failed),
-            String(totalAll),
-            String(rateAll),
+            isRu ? "ИТОГО" : "TOTAL",  // Локализованная метка итогов
+            String(completed),         // Сумма выполненных
+            String(inWork),            // Сумма в работе
+            String(failed),            // Сумма просроченных
+            String(totalAll),          // Общая сумма задач
+            String(rateAll),           // Общий процент выполнения
         ]);
     }
 
+    // Преобразование массива строк в CSV текст
+    // rows.map((r) => r.join(delimiter)) - объединение каждой строки разделителем
+    // .join(lineBreak) - объединение всех строк разделителем строк
     const csvBody = rows.map((r) => r.join(delimiter)).join(lineBreak);
+    // Добавление BOM (Byte Order Mark) если нужно
     const csv = (addBOM ? "\uFEFF" : "") + csvBody;
 
+    // Создание Blob объекта с CSV данными
+    // Blob - бинарный объект для работы с файлами
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    // Создание URL для доступа к Blob
     const url = URL.createObjectURL(blob);
 
+    // Создание временной метки для имени файла
+    // new Date().toISOString() - текущая дата в формате ISO
+    // .replace(/[:]/g, "-") - замена двоеточий на дефисы (недопустимы в именах файлов)
+    // .slice(0, 19) - обрезка до формата YYYY-MM-DDTHH-mm-ss
     const ts = new Date().toISOString().replace(/[:]/g, "-").slice(0, 19);
+    // Определение базового имени файла
     const base = filenameBase ?? `dashboard_stats_${ts}`;
+
+    // Создание временной ссылки для скачивания
     const a = document.createElement("a");
-    a.href = url;
-    a.download = `${base}.csv`;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    a.href = url;                           // URL к Blob объекту
+    a.download = `${base}.csv`;             // Имя файла для скачивания
+    a.style.display = "none";               // Скрытие ссылки
+    document.body.appendChild(a);           // Добавление ссылки в DOM
+    a.click();                              // Программный клик для скачивания
+    document.body.removeChild(a);           // Удаление ссылки из DOM
+    URL.revokeObjectURL(url);               // Освобождение URL объекта
 }
 
 /**
+ * Вспомогательная функция для экранирования значений в CSV
  * Экранируем значение по CSV-правилам и защищаем от CSV-инъекций:
  * 1) Если начинается с =,+,-,@ — префиксуем апостроф.
  * 2) Если есть кавычки/переводы строк/разделитель — оборачиваем в кавычки и удваиваем кавычки.
  */
 function escapeCSV(value: string, delimiter: string): string {
+    // Проверка на null или undefined
     if (value == null) return "";
 
+    // Преобразование в строку
     let v = String(value);
 
-    // CSV injection guard
+    // Защита от CSV инъекций - добавление апострофа перед формулами
+    // /^[=+\-@]/ - регулярное выражение для символов начала формул
     if (/^[=+\-@]/.test(v)) v = "'" + v;
 
+    // Проверка необходимости кавычек:
+    // - Содержит двойные кавычки
+    // - Содержит переводы строк (\r, \n)  
+    // - Содержит разделитель столбцов
     const needsQuotes = v.includes('"') || v.includes("\r") || v.includes("\n") || v.includes(delimiter);
+    // Удвоение двойных кавычек внутри строки (CSV стандарт)
     if (v.includes('"')) v = v.replace(/"/g, '""');
+    // Оборачивание в кавычки если необходимо
     return needsQuotes ? `"${v}"` : v;
 }
+
+
+
+
+// =====================================================
+// ПОЯСНЕНИЯ К КОММЕНТАРИЯМ В КОДЕ:
+// =====================================================
+
+// 1. ГИБКОСТЬ НАСТРОЕК ЭКСПОРТА:
+//    - localeAwareDelimiter: автоматический выбор разделителя (; для RU, , для других)
+//    - forcedDelimiter: принудительное указание разделителя
+//    - addBOM: BOM маркер для корректного отображения в Excel на Windows
+//    - addTotalsRow: добавление строки с суммарными показателями
+//    - headers: гибкая настройка заголовков (авто, ru, en, кастомные)
+//    - lineBreak: выбор разделителя строк (CRLF для Excel)
+//    - filenameBase: кастомное имя файла
+
+// 2. МЕЖДУНАРОДИЗАЦИЯ И ЛОКАЛИЗАЦИЯ:
+//    - Автоматическое определение языка браузера
+//    - Разные разделители для разных регионов (; в Европе, , в США)
+//    - Локализованные заголовки и метки
+//    - Поддержка UTF-8 для всех языков
+
+// 3. БЕЗОПАСНОСТЬ (CSV INJECTION PROTECTION):
+//    - Защита от формул Excel (=, +, -, @) через добавление апострофа
+//    - Предотвращение выполнения кода при открытии в Excel
+//    - Экранирование специальных символов
+
+// 4. СТАНДАРТЫ CSV ФОРМАТА:
+//    - Корректное экранирование кавычек (удвоение)
+//    - Оборачивание в кавычки при наличии специальных символов
+//    - Поддержка CRLF для совместимости с Excel
+//    - BOM маркер для UTF-8 кодировки
+
+// 5. ВЫЧИСЛЕНИЯ И АГРЕГАЦИЯ ДАННЫХ:
+//    - Расчет общего количества задач для каждого пользователя
+//    - Вычисление процента выполнения
+//    - Суммирование показателей по всем пользователям
+//    - Расчет общего процента выполнения
+
+// 6. РАБОТА С ФАЙЛАМИ И BLOB:
+//    - Создание Blob объекта с правильным MIME-типом
+//    - Генерация временного URL для скачивания
+//    - Автоматическое создание и удаление временных элементов DOM
+//    - Освобождение ресурсов (revokeObjectURL)
+
+// 7. ФОРМАТИРОВАНИЕ ИМЕНИ ФАЙЛА:
+//    - Автоматическая генерация временной метки
+//    - Замена недопустимых символов в имени файла
+//    - Возможность кастомного имени файла
+//    - Стандартное расширение .csv
+
+// 8. ОБРАБОТКА ГРАНИЧНЫХ СЛУЧАЕВ:
+//    - Защита от null/undefined значений
+//    - Обработка деления на ноль при расчете процентов
+//    - Безопасный доступ к navigator.language
+//    - Значения по умолчанию для всех опциональных параметров
+
+// 9. ПРОИЗВОДИТЕЛЬНОСТЬ:
+//    - Эффективное преобразование данных за один проход
+//    - Минимальное взаимодействие с DOM
+//    - Быстрое создание и удаление временных элементов
+
+// 10. СОВМЕСТИМОСТЬ:
+//     - Работа во всех современных браузерах
+//     - Корректное отображение в Excel, Google Sheets, LibreOffice
+//     - Поддержка Windows, macOS, Linux
+//     - UTF-8 кодировка для международных символов

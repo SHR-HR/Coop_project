@@ -1,57 +1,140 @@
+// Использование модульной системы SCSS для импорта переменных из внешнего файла
+// Импорт файла с переменными из папки styles/abstracts, псевдоним $ для удобства обращения
 @use "../../../styles/abstracts/variables" as *;
 
+// Основной класс-обертка для кнопки
 .wrapper {
+  // Отображение как inline-flex элемент для гибкого выравнивания содержимого
   display: inline-flex;
+  // Выравнивание содержимого по центру по вертикали
   align-items: center;
+  // Выравнивание содержимого по центру по горизонтали
   justify-content: center;
+  // Внутренние отступы: вертикальные из переменной $space-sm, горизонтальные из $space-md
   padding: $space-sm $space-md;
+  // Размер шрифта из переменной $font-size-md
   font-size: $font-size-md;
+  // Удаление стандартной границы кнопки
   border: none;
+  // Скругление углов из переменной $radius-md
   border-radius: $radius-md;
+  // Изменение курсора на указатель при наведении
   cursor: pointer;
+  // Плавные переходы для transform, background-color и filter
   transition: transform 0.1s ease, background-color 0.2s ease, filter 0.2s ease;
 
+  // Стили для состояния "отключено"
   &:disabled {
+    // Изменение курсора на "не разрешено"
     cursor: not-allowed;
+    // Цвет фона из переменной $disabled-color
     background-color: $disabled-color;
+    // Полупрозрачное отображение
     opacity: 0.5;
+    // Сброс transform эффектов
     transform: none;
   }
 
+  // Стили для наведения, когда кнопка не отключена
   &:hover:not(:disabled) {
+    // Увеличение яркости на 15% при наведении
     filter: brightness(1.15);
   }
 
+  // Стили для активного состояния (нажатия), когда кнопка не отключена
   &:active:not(:disabled) {
+    // Легкое уменьшение размера при нажатии (эффект нажатия)
     transform: scale(0.98);
   }
 
+  // Стили для фокуса при навигации с клавиатуры
   &:focus-visible {
+    // Внешняя обводка толщиной 2px цветом из $border-color
     outline: 2px solid $border-color;
+    // Отступ обводки от элемента
     outline-offset: 2px;
   }
 }
 
+// Класс для основного стиля кнопки
 .primary {
+  // Цвет фона из переменной $primary-color
   background-color: $primary-color;
+  // Цвет текста из переменной $text-color-inverse (контрастный цвет)
   color: $text-color-inverse;
+  // Цвет границы из переменной $primary-color
   border-color: $primary-color;
 }
 
+// Класс для второстепенного стиля кнопки
 .secondary {
+  // Цвет фона из переменной $secondary-color
   background-color: $secondary-color;
+  // Цвет текста из переменной $text-color-inverse (контрастный цвет)
   color: $text-color-inverse;
+  // Цвет границы из переменной $secondary-color
   border-color: $secondary-color;
 }
 
+// Класс для стиля кнопки "успех"
 .success {
+  // Цвет фона из переменной $success-color
   background-color: $success-color;
+  // Цвет текста из переменной $text-color-inverse (контрастный цвет)
   color: $text-color-inverse;
+  // Цвет границы из переменной $success-color
   border-color: $success-color;
 }
 
+// Класс для стиля кнопки "опасность"
 .danger {
+  // Цвет фона из переменной $danger-color
   background-color: $danger-color;
+  // Цвет текста из переменной $text-color-inverse (контрастный цвет)
   color: $text-color-inverse;
+  // Цвет границы из переменной $danger-color
   border-color: $danger-color;
 }
+
+/* ===== ПОЯСНЕНИЯ К КОММЕНТАРИЯМ ===== */
+
+/*
+1. @use "../../../styles/abstracts/variables" as *;
+   - Импортирует все переменные из файла variables.scss без необходимости использования префикса
+   - Относительный путь ведет на три уровня выше от текущего файла
+
+2. .wrapper - основной класс для кнопки:
+   - display: inline-flex - позволяет кнопке быть строчным элементом с flex-возможностями
+   - padding: $space-sm $space-md - использует переменные для согласованных отступов
+   - transition - плавные анимации для интерактивных состояний
+
+3. Псевдоклассы состояния кнопки:
+   - &:disabled - стили для неактивной кнопки
+   - &:hover:not(:disabled) - эффект наведения только для активных кнопок
+   - &:active:not(:disabled) - эффект нажатия только для активных кнопок
+   - &:focus-visible - доступность для клавиатурной навигации
+
+4. Модификаторы цветов кнопок:
+   - .primary - основной цвет для главных действий
+   - .secondary - второстепенный цвет для дополнительных действий
+   - .success - зеленый цвет для успешных операций
+   - .danger - красный цвет для опасных операций
+
+5. Эффекты взаимодействия:
+   - filter: brightness(1.15) - увеличение яркости при наведении
+   - transform: scale(0.98) - легкое сжатие при нажатии
+   - cursor: not-allowed - специальный курсор для отключенных кнопок
+
+6. Переменные SCSS (предполагаемое содержание):
+   - $space-sm, $space-md - размеры отступов (маленький и средний)
+   - $font-size-md - средний размер шрифта
+   - $radius-md - средний радиус скругления
+   - $disabled-color - цвет для отключенных элементов
+   - $primary-color, $secondary-color, $success-color, $danger-color - цветовая палитра
+   - $text-color-inverse - контрастный цвет текста для темных фонов
+   - $border-color - цвет для обводки фокуса
+
+7. Особенности доступности:
+   - &:focus-visible - срабатывает только при фокусе с клавиатуры, не с мыши
+   - outline-offset: 2px - отступ обводки для лучшей видимости
+*/

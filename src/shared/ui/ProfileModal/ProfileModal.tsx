@@ -1,36 +1,96 @@
+// Импорт библиотеки React для использования функциональных компонентов и JSX
 import React from "react";
+// Импорт стилей из файла ProfileModal.module.scss с псевдонимом s для удобства обращения
 import s from "./ProfileModal.module.scss";
 
+// Определение интерфейса (типов) для пропсов (свойств) компонента ProfileModal
+// Интерфейс расширяет стандартные HTML атрибуты для элемента HTMLElement
 interface ModalShellProps extends React.HTMLAttributes<HTMLElement> {
+    // onClose - необязательная функция-обработчик закрытия модального окна
     onClose?: () => void;
+    // onSubmit - необязательная функция-обработчик отправки формы
     onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
+    // children - необязательное свойство для дочерних React-элементов
     children?: React.ReactNode;
+    // render - необязательная функция для рендеринга содержимого (альтернатива children)
     render?: () => React.ReactNode;
+    // modalError - необязательное свойство для отображения ошибки в модальном окне
     modalError?: string | null;
 }
 
+// Объявление функционального компонента ProfileModal с типом React.FC (Functional Component)
+// Деструктуризация пропсов в параметрах функции для прямого доступа к свойствам
+// Использование rest оператора для сбора оставшихся пропсов
 const ProfileModal: React.FC<ModalShellProps> = ({
+    // onClose - функция закрытия модального окна
     onClose,
+    // onSubmit - функция отправки формы
     onSubmit,
+    // children - дочерние элементы
     children,
+    // render - функция рендеринга содержимого
     render,
+    // modalError - текст ошибки для отображения
     modalError,
+    // rest - все остальные пропсы, которые будут переданы в div элемент
     ...rest
-    }) => {
+}) => {
+    // Возвращение JSX-разметки компонента модального окна
     return (
+        // Фрагмент React для возврата нескольких элементов без обертки
         <>
-            <div className={s.modalOverlay} onClick={onClose}></div>
-            <div className={s.modalBackground} {...rest} role="dialog" aria-modal="true">
+            {/* Полупрозрачный оверлей, который закрывает фон */}
+            <div
+                // Применение CSS-класса для оверлея из модуля стилей
+                className={s.modalOverlay}
+                // Обработчик клика по оверлею для закрытия модального окна
+                onClick={onClose}
+            >
+                {/* Пустое содержимое оверлея */}
+            </div>
+
+            {/* Основной контейнер модального окна */}
+            <div
+                // Применение CSS-класса для фонового контейнера
+                className={s.modalBackground}
+                // Передача всех остальных пропсов (атрибутов HTML) в элемент
+                {...rest}
+                // ARIA-атрибут для обозначения роли элемента как диалогового окна
+                role="dialog"
+                // ARIA-атрибут для обозначения модальности (блокирует взаимодействие с фоном)
+                aria-modal="true"
+            >
+                {/* Контейнер формы модального окна */}
                 <div className={s.formContainer}>
+                    {/* Кнопка закрытия модального окна в виде изображения */}
                     <img
+                        // Применение CSS-класса для кнопки закрытия
                         className={s.formContainer__closeModal}
+                        // Путь к изображению иконки закрытия
                         src="/closeModal.svg"
+                        // Альтернативный текст для доступности (скринридеры)
                         alt="close"
+                        // Обработчик клика по кнопке закрытия
                         onClick={onClose}
                     />
-                    <form className={s.formContainer__form} onSubmit={onSubmit}>
+
+                    {/* Форма модального окна */}
+                    <form
+                        // Применение CSS-класса для формы
+                        className={s.formContainer__form}
+                        // Обработчик события отправки формы
+                        onSubmit={onSubmit}
+                    >
+                        {/* Условный рендеринг содержимого:优先使用 render функцию, если она передана, иначе children */}
                         {render ? render() : children}
-                        {modalError && <span className={s.formContainer__error}>{modalError}</span>}
+
+                        {/* Условный рендеринг ошибки: отображается только если modalError существует */}
+                        {modalError && (
+                            <span className={s.formContainer__error}>
+                                {/* Отображение текста ошибки */}
+                                {modalError}
+                            </span>
+                        )}
                     </form>
                 </div>
             </div>
@@ -38,4 +98,88 @@ const ProfileModal: React.FC<ModalShellProps> = ({
     );
 };
 
+// Экспорт компонента ProfileModal по умолчанию для использования в других файлах
 export default ProfileModal;
+
+
+
+/* ===== ПОЯСНЕНИЯ К КОММЕНТАРИЯМ ===== */
+
+/*
+1. import React from "react";
+   - Обязательный импорт для работы с React компонентами и JSX
+   - React.FormEvent, React.ReactNode, React.HTMLAttributes используются для типизации
+
+2. import s from "./ProfileModal.module.scss";
+   - Импорт CSS Modules стилей из соседнего файла
+   - Псевдоним 's' позволяет обращаться к классам как s.className
+
+3. interface ModalShellProps extends React.HTMLAttributes<HTMLElement>
+   - TypeScript интерфейс для типизации пропсов компонента
+   - extends React.HTMLAttributes<HTMLElement> - наследует все стандартные HTML атрибуты
+   - Позволяет передавать такие пропсы как className, id, style и другие
+
+4. Свойства интерфейса:
+   - onClose?: () => void - необязательная функция без параметров и возвращаемого значения
+   - onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void - функция с событием формы
+   - children?: React.ReactNode - стандартное свойство для дочерних элементов
+   - render?: () => React.ReactNode - альтернативный способ рендеринга содержимого
+   - modalError?: string | null - строка ошибки или null
+
+5. React.FC<ModalShellProps> - типизация функционального компонента:
+   - Обеспечивает проверку типов пропсов
+   - Предоставляет автодополнение в IDE
+   - Указывает, что компонент принимает пропсы типа ModalShellProps
+
+6. Деструктуризация с rest оператором:
+   - {...rest} - собирает все неперечисленные пропсы в объект rest
+   - Позволяет передавать дополнительные HTML атрибуты в компонент
+
+7. Структура JSX:
+   - <> </> - React Fragment для возврата нескольких элементов без лишнего DOM-элемента
+   - Два основных div: .modalOverlay и .modalBackground
+   - Вложенная структура: formContainer -> closeModal img + form
+
+8. .modalOverlay элемент:
+   - onClick={onClose} - закрытие модального окна при клике на оверлей
+   - Полупрозрачный фон, который блокирует взаимодействие с контентом behind
+
+9. .modalBackground элемент:
+   - {...rest} - передача всех дополнительных пропсов (className, style и т.д.)
+   - role="dialog" - ARIA-роль для обозначения диалогового окна
+   - aria-modal="true" - указывает, что окно модальное и блокирует фон
+
+10. Кнопка закрытия (img):
+    - src="/closeModal.svg" - путь к иконке закрытия (предполагается в public folder)
+    - alt="close" - альтернативный текст для доступности
+    - onClick={onClose} - обработчик закрытия при клике на иконку
+
+11. Форма:
+    - onSubmit={onSubmit} - обработчик отправки формы
+    - Содержит условный рендеринг содержимого и ошибки
+
+12. Условный рендеринг содержимого:
+    - {render ? render() : children} - приоритет отдается render функции
+    - Если render передан, вызывается render(), иначе отображаются children
+
+13. Условный рендеринг ошибки:
+    - {modalError && <span>...</span>} - отображает ошибку только если modalError существует
+    - Использует класс formContainer__error для стилизации
+
+14. Особенности доступности:
+    - role="dialog" и aria-modal="true" для скринридеров
+    - alt="close" для описания иконки закрытия
+    - Модальное окно правильно блокирует взаимодействие с фоном
+
+15. Архитектурные решения:
+    - Гибкий компонент с двумя способами передачи содержимого (children/render)
+    - Поддержка стандартных HTML атрибутов через extends React.HTMLAttributes
+    - Универсальная структура для различных типов модальных окон
+    - Правильная семантика и доступность
+
+16. Пользовательский опыт:
+    - Закрытие по клику на оверлей или иконку закрытия
+    - Визуальное отделение модального окна от фона
+    - Отображение ошибок в стандартизированном формате
+    - Адаптивный дизайн (управляется через SCSS модуль)
+*/

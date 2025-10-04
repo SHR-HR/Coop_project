@@ -1,49 +1,175 @@
+// Импорт всей библиотеки XLSX под псевдонимом XLSX для работы с Excel файлами
 import * as XLSX from "xlsx";
+// Импорт функции saveAs из библиотеки file-saver для сохранения файлов
 import { saveAs } from "file-saver";
+// Импорт типа UserStatistic для типизации данных пользователя
 import type { UserStatistic } from "../types/types";
 
-export function exportUsersStatToXLSX(items: UserStatistic[], filenameBase = "dashboard_stats") {
+/**
+ * Функция для экспорта статистики пользователей в XLSX файл (Excel формат)
+ * Создает полноценный Excel файл с данными статистики и итоговой строкой
+ */
+// Функция принимает массив статистики пользователей и опциональное базовое имя файла
+export function exportUsersStatToXLSX(
+    items: UserStatistic[],           // Массив данных статистики пользователей для экспорта
+    filenameBase = "dashboard_stats"  // Базовое имя файла, по умолчанию "dashboard_stats"
+) {
+    // Определение языка пользователя для локализации заголовков
+    // navigator?.language - безопасный доступ к языку браузера
+    // toLowerCase().startsWith("ru") - проверка на русский язык
     const isRu = (navigator?.language || "").toLowerCase().startsWith("ru");
-    const headers = isRu
-        ? ["Имя", "Выполнено", "В работе", "Просрочено", "Всего", "Готово(%)"]
-        : ["name", "completed", "inWork", "failed", "total", "doneRate(%)"];
 
+    // Создание заголовков столбцов в зависимости от языка пользователя
+    // Если русский язык - используем русские заголовки, иначе английские
+    const headers = isRu
+        ? ["Имя", "Выполнено", "В работе", "Просрочено", "Всего", "Готово(%)"]  // Русские заголовки
+        : ["name", "completed", "inWork", "failed", "total", "doneRate(%)"];    // Английские заголовки
+
+    // Преобразование данных пользователей в строки таблицы
+    // Array.map создает массив массивов (двумерный массив) для Excel
     const rows = items.map((u) => {
+        // Вычисление общего количества задач пользователя
         const total = u.completedTasks + u.inWorkTasks + u.failedTasks;
+        // Вычисление процента выполненных задач
         const rate = total ? Math.round((u.completedTasks / total) * 100) : 0;
-        return [u.name, u.completedTasks, u.inWorkTasks, u.failedTasks, total, rate];
+        // Возврат массива значений для одной строки Excel
+        return [
+            u.name,             // Имя пользователя
+            u.completedTasks,   // Количество выполненных задач
+            u.inWorkTasks,      // Количество задач в работе
+            u.failedTasks,      // Количество просроченных задач
+            total,              // Общее количество задач
+            rate,               // Процент выполненных задач
+        ];
     });
 
+    // Вычисление суммарных показателей по всем пользователям
+    // Array.reduce агрегирует данные в объект с суммами
     const totals = items.reduce(
         (acc, u) => {
-            acc.completed += u.completedTasks;
-            acc.inWork += u.inWorkTasks;
-            acc.failed += u.failedTasks;
-            return acc;
+            acc.completed += u.completedTasks;  // Суммирование выполненных задач
+            acc.inWork += u.inWorkTasks;        // Суммирование задач в работе
+            acc.failed += u.failedTasks;        // Суммирование просроченных задач
+            return acc;  // Возврат аккумулятора для следующей итерации
         },
+        // Начальное значение аккумулятора
         { completed: 0, inWork: 0, failed: 0 }
     );
+    // Вычисление общего количества всех задач
     const totalAll = totals.completed + totals.inWork + totals.failed;
+    // Вычисление общего процента выполненных задач
     const rateAll = totalAll ? Math.round((totals.completed / totalAll) * 100) : 0;
 
+    // Создание полного набора данных для Excel таблицы
+    // Двумерный массив где каждый внутренний массив - строка в Excel
     const data = [
-        headers,
-        ...rows,
-        [isRu ? "ИТОГО" : "TOTAL", totals.completed, totals.inWork, totals.failed, totalAll, rateAll],
+        headers,  // Первая строка - заголовки столбцов
+        ...rows,  // Развертывание всех строк с данными пользователей
+        // Последняя строка - итоги с локализованной меткой
+        [
+            isRu ? "ИТОГО" : "TOTAL",  // Локализованная метка итогов
+            totals.completed,          // Сумма выполненных задач
+            totals.inWork,             // Сумма задач в работе
+            totals.failed,             // Сумма просроченных задач
+            totalAll,                  // Общее количество всех задач
+            rateAll,                   // Общий процент выполнения
+        ],
     ];
 
+    // Создание новой рабочей книги Excel
+    // XLSX.utils.book_new() создает пустую рабочую книгу
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, ws, "Stats");
 
+    // Создание рабочего листа из данных
+    // XLSX.utils.aoa_to_sheet преобразует массив массивов в формат рабочего листа Excel
+    // "aoa" означает "array of arrays" (массив массивов)
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    // Добавление рабочего листа в рабочую книгу
+    // XLSX.utils.book_append_sheet добавляет лист с указанным именем
+    XLSX.utils.book_append_sheet(wb, ws, "Stats");  // "Stats" - имя вкладки в Excel
+
+    // Создание временной метки для имени файла
+    // new Date().toISOString() - текущая дата в формате ISO
+    // .replace(/[:]/g, "-") - замена двоеточий на дефисы (недопустимы в именах файлов)
+    // .slice(0, 19) - обрезка до формата YYYY-MM-DDTHH-mm-ss
     const ts = new Date().toISOString().replace(/[:]/g, "-").slice(0, 19);
+
+    // Преобразование рабочей книги в бинарный формат
+    // XLSX.write генерирует файл в виде массива байтов
+    // bookType: "xlsx" - указывает формат Excel (xlsx)
+    // type: "array" - возвращает данные как ArrayBuffer
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
 
-    // можно оставить "application/octet-stream", но так красивее
-    const mime =
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    // Определение MIME типа для Excel файла
+    // "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" - официальный MIME тип для xlsx
+    // Комментарий поясняет что можно использовать "application/octet-stream", но это более точно
+    const mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    // Сохранение файла с помощью file-saver
+    // new Blob([wbout], { type: mime }) - создает Blob объект из бинарных данных
+    // saveAs - запускает скачивание файла с указанным именем
     saveAs(new Blob([wbout], { type: mime }), `${filenameBase}_${ts}.xlsx`);
 }
 
 
+// =====================================================
+// ПОЯСНЕНИЯ К КОММЕНТАРИЯМ В КОДЕ:
+// =====================================================
 
+// 1. БИБЛИОТЕКИ И ЗАВИСИМОСТИ:
+//    - xlsx: мощная библиотека для работы с Excel файлами (чтение/запись)
+//    - file-saver: упрощает процесс сохранения файлов в браузере
+//    - Обе библиотеки широко используются и хорошо поддерживаются
+
+// 2. ЛОКАЛИЗАЦИЯ И ИНТЕРНАЦИОНАЛИЗАЦИЯ:
+//    - Автоматическое определение языка браузера пользователя
+//    - Русские заголовки для русскоязычных пользователей
+//    - Английские заголовки для всех остальных языков
+//    - Локализованная метка "ИТОГО"/"TOTAL" в строке итогов
+
+// 3. СТРУКТУРА ДАННЫХ ДЛЯ EXCEL:
+//    - headers: массив заголовков столбцов
+//    - rows: массив строк с данными пользователей
+//    - data: полный набор данных включая заголовки и итоги
+//    - Двумерный массив (array of arrays) - естественный формат для табличных данных
+
+// 4. ВЫЧИСЛЕНИЯ И АГРЕГАЦИЯ:
+//    - total: сумма всех типов задач для каждого пользователя
+//    - rate: процент выполненных задач (округленный до целого)
+//    - totals: агрегированные суммы по всем пользователям через reduce
+//    - rateAll: общий процент выполненных задач по всем пользователям
+
+// 5. РАБОТА С EXCEL ФАЙЛАМИ:
+//    - XLSX.utils.book_new(): создание новой рабочей книги
+//    - XLSX.utils.aoa_to_sheet(): преобразование данных в рабочий лист
+//    - XLSX.utils.book_append_sheet(): добавление листа в книгу
+//    - XLSX.write(): генерация бинарных данных файла
+
+// 6. ФОРМАТЫ И MIME ТИПЫ:
+//    - bookType: "xlsx" - современный формат Excel (Office Open XML)
+//    - MIME тип "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+//    - Поддерживается Excel, LibreOffice, Google Sheets и другими программами
+
+// 7. СОХРАНЕНИЕ ФАЙЛА:
+//    - saveAs из библиотеки file-saver обеспечивает кроссплатформенное сохранение
+//    - Blob объект представляет файл в памяти браузера
+//    - Автоматическое скачивание с правильным именем и расширением
+
+// 8. ФОРМАТИРОВАНИЕ ИМЕНИ ФАЙЛА:
+//    - filenameBase: базовая часть имени (по умолчанию "dashboard_stats")
+//    - Временная метка обеспечивает уникальность имени файла
+//    - Расширение .xlsx указывает на формат Excel
+//    - Замена двоеточий на дефисы для совместимости с файловыми системами
+
+// 9. ПРЕИМУЩЕСТВА XLSX ФОРМАТА:
+//    - Нативный формат Microsoft Excel
+//    - Поддержка формул, форматирования, нескольких листов
+//    - Хорошая совместимость с различным ПО
+//    - Сжатие данных (меньший размер файла)
+
+// 10. ОБРАБОТКА ОШИБОК И ГРАНИЧНЫХ СЛУЧАЕВ:
+//     - Защита от деления на ноль при расчете процентов
+//     - Обработка пустого массива items
+//     - Значения по умолчанию для параметров
+//     - Безопасный доступ к navigator.language

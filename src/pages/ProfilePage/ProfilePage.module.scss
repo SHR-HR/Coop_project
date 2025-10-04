@@ -1,204 +1,349 @@
+// Подключение файла с переменными из папки стилей с использованием пространства имен 'variables'
+// Директива @use импортирует переменные SCSS для использования в этом файле
+// 'as *' означает импорт всех переменных без необходимости использования префикса namespace
 @use '../../styles/abstracts/variables' as *;
 
+// Основной контейнер карточки профиля пользователя
 .profileCard {
+  // Относительное позиционирование для внутренних абсолютно позиционированных элементов
   position: relative;
+  // Ширина контейнера: минимальное значение между $breakpoint-xl и 100%
+  // Ограничивает максимальную ширину но позволяет адаптироваться на маленьких экранах
   width: min($breakpoint-xl, 100%);
+  // Центрирование контейнера по горизонтали
   margin: 0 auto;
+  // Цвет фона из переменных дизайн-системы
   background: $bg-color;
+  // Граница толщиной 1px из переменных
   border: 1px solid $border-color;
+  // Скругление углов из переменных (большой радиус)
   border-radius: $radius-lg;
+  // Тень из переменных (средняя тень)
   box-shadow: $shadow-md;
+  // Скрытие содержимого выходящего за границы контейнера
   overflow: hidden;
+  // Анимация появления с задержкой 0.28s и сохранением конечного состояния
   animation: appearUp .28s ease both;
 }
 
+// Декоративная обложка профиля (верхняя часть)
 .cover {
+  // Фиксированная высота обложки
   height: 120px;
+  // Градиентный фон с тремя цветами из переменных дизайн-системы
   background: linear-gradient(135deg, $color-teal-1, $color-blue-1 55%, $color-purple-1);
 }
 
+// Шапка профиля с аватаром и информацией
 .header {
+  // Flexbox для горизонтального расположения элементов
   display: flex;
+  // Выравнивание элементов по вертикали по центру
   align-items: center;
+  // Распределение пространства между элементами
   justify-content: space-between;
+  // Расстояние между элементами из переменных (средний отступ)
   gap: $space-md;
+  // Внутренние отступы: большой сверху, большой по бокам, средний снизу
   padding: $space-lg $space-lg $space-md;
+  // Отрицательный внешний отступ сверху для наложения на обложку
   margin-top: -48px;
 }
 
+// Контейнер для идентификационных данных (аватар + имя)
 .identity {
+  // Flexbox для горизонтального расположения
   display: flex;
+  // Выравнивание по вертикали по центру
   align-items: center;
+  // Расстояние между аватаром и текстом
   gap: $space-md;
 }
 
+// Большой аватар пользователя
 .userAvatarXL {
+  // Ширина и высота аватара
   width: 96px;
   height: 96px;
+  // Круглая форма
   border-radius: 50%;
+  // Обрезка изображения для заполнения контейнера с сохранением пропорций
   object-fit: cover;
+  // Качество рендеринга изображения - автоматическое
   image-rendering: auto;
+  // Граница аватара толщиной 4px цвета фона
   border: 4px solid $bg-color;
-  box-shadow: 0 6px 16px rgba(0,0,0,.18);
+  // Тень для создания эффекта "парящего" элемента
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .18);
 }
 
+// Контейнер для имени и username
 .nameBlock {
+  // Flexbox с вертикальным направлением
   display: flex;
   flex-direction: column;
+  // Отступ сверху для визуального выравнивания
   margin-top: 15px;
 }
 
+// Отображаемое имя пользователя
 .displayName {
+  // Убираем стандартные отступы
   margin: 0;
+  // Крупный размер шрифта
   font-size: 28px;
+  // Межстрочный интервал
   line-height: 1.2;
+  // Цвет текста из переменных
   color: $text-color;
 }
 
+// Username (никнейм)
 .username {
+  // Небольшой отступ сверху
   margin-top: 2px;
+  // Светлый цвет текста для менее важной информации
   color: $text-color-light;
+  // Малый размер шрифта
   font-size: $font-size-sm;
 }
 
+// Контейнер для кнопок действий
 .actions {
+  // Flexbox для горизонтального расположения кнопок
   display: flex;
+  // Расстояние между кнопками
   gap: $space-sm;
+  // Разрешение переноса на новую строку
   flex-wrap: wrap;
+  // Отступ сверху для позиционирования относительно аватара
   margin-top: 40px;
 
+  // Стили для всех кнопок внутри контейнера
   button {
+    // Плавный переход для transform свойства
     transition: transform 0.30s;
+
+    // Эффект при наведении
     &:hover {
+      // Изменение курсора на указатель
       cursor: pointer;
+      // Поднимаем кнопку на 6px при наведении
       transform: translateY(-6px);
     }
   }
 }
 
+// Секция со статистикой
 .stats {
+  // Внутренние отступы: 0 сверху, большие по бокам и снизу
   padding: 0 $space-lg $space-lg;
+  // Верхняя граница в виде пунктирной линии
   border-top: 1px dashed $border-color;
 }
 
+// Список KPI показателей
 .kpis {
+  // Внешние отступы: средний сверху и снизу
   margin: $space-md 0 $space-md;
+  // Убираем внутренние отступы по умолчанию
   padding: 0;
+  // Grid layout для расположения KPI
   display: grid;
+  // 3 колонки с минимальной шириной 140px
   grid-template-columns: repeat(3, minmax(140px, 1fr));
+  // Расстояние между элементами grid
   gap: $space-sm;
+  // Убираем маркеры списка
   list-style: none;
 }
 
+// Отдельный KPI показатель
 .kpi {
+  // Светлый фон для визуального выделения
   background: #f7fbfa;
+  // Граница толщиной 1px
   border: 1px solid $border-color;
+  // Скругление углов (средний радиус)
   border-radius: $radius-md;
+  // Внутренние отступы: малые сверху/снизу, средние по бокам
   padding: $space-sm $space-md;
+  // Flexbox для расположения числа и текста
   display: flex;
   align-items: center;
+  // Распределение пространства между числом и текстом
   justify-content: space-between;
 
+  // Стили для числа (жирный текст)
   b {
+    // Размер шрифта
     font-size: 18px;
+    // Цвет текста
     color: $text-color;
   }
 
+  // Стили для подписи
   span {
+    // Светлый цвет текста
     color: $text-color-light;
+    // Малый размер шрифта
     font-size: $font-size-sm;
   }
 }
 
+// Обертка для карточки статистики пользователя
 .userStatCardWrap {
+  // Отступ сверху
   margin-top: $space-sm;
 }
 
+// Контейнер для карточки авторизации (когда пользователь не авторизован)
 .authContainer {
+  // Ширина 100% родительского контейнера
   width: 100%;
+  // Flexbox для центрирования по горизонтали
   display: flex;
   justify-content: center;
+  // Внутренние отступы сверху и снизу
   padding: $space-lg 0;
 
+  // Карточка авторизации
   .authCard {
+    // Flexbox для расположения изображения и текста
     display: flex;
     align-items: center;
+    // Расстояние между элементами
     gap: $space-lg;
+    // Ширина: минимальное значение между 880px и 100%
     width: min(880px, 100%);
+    // Максимальная ширина из переменных
     max-width: $breakpoint-lg;
+    // Градиентный фон с прозрачностью
     background: linear-gradient(180deg, rgba($color-white, 0.98), $bg-color);
+    // Граница
     border: 1px solid $border-color;
+    // Скругление углов
     border-radius: $radius-lg;
+    // Внутренние отступы
     padding: $space-lg;
+    // Тень (большая)
     box-shadow: $shadow-lg;
+    // Плавные переходы для transform и box-shadow
     transition: transform .22s ease, box-shadow .22s ease;
+    // Анимация появления
     animation: appearUp .28s ease both;
 
+    // Эффект при наведении на карточку
     &:hover {
+      // Поднимаем карточку на 6px
       transform: translateY(-6px);
-      box-shadow: 0 8px 26px rgba(0,0,0,0.12);
+      // Увеличиваем тень
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.12);
     }
 
+    // Декоративный элемент с изображением
     .art {
+      // Фиксированная ширина без растягивания
       flex: 0 0 88px;
+      // Flexbox для центрирования изображения
       display: flex;
       align-items: center;
       justify-content: center;
 
+      // Стили для изображения
       img {
+        // Размеры изображения
         width: 88px;
         height: 88px;
+        // Цвет (для SVG)
         color: $primary-color;
-        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.06));
+        // Тень для изображения
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.06));
+        // Круглая форма
         border-radius: 50%;
+        // Дополнительная тень
         box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.35);
       }
     }
 
+    // Тело карточки авторизации
     .authBody {
+      // Занимает все доступное пространство
       flex: 1;
+      // Минимальная ширина 0 для правильной работы flexbox
       min-width: 0;
 
+      // Заголовок авторизации
       .authTitle {
+        // Убираем стандартные отступы, добавляем отступ снизу
         margin: 0 0 6px;
+        // Размер шрифта (очень большой)
         font-size: $font-size-xl;
+        // Цвет текста
         color: $text-color;
       }
 
+      // Подзаголовок авторизации
       .authSubtitle {
+        // Убираем стандартные отступы, добавляем отступ снизу
         margin: 0 0 $space-sm;
+        // Светлый цвет текста
         color: $text-color-light;
+        // Средний размер шрифта
         font-size: $font-size-md;
       }
 
+      // Строка с кнопками действий
       .actionsRow {
+        // Flexbox для горизонтального расположения
         display: flex;
         gap: $space-sm;
         align-items: center;
+        // Отступ сверху
         margin-top: $space-sm;
 
+        // Стили для кнопки авторизации
         .authButton {
+          // Внутренние отступы
           padding: $space-sm $space-md;
+          // Размер шрифта
           font-size: $font-size-md;
+          // Скругление углов
           border-radius: $radius-md;
+          // Тень
           box-shadow: $shadow-sm;
         }
       }
 
+      // Подсказка внизу карточки
       .smallHint {
+        // Отступ сверху
         margin-top: $space-sm;
+        // Малый размер шрифта
         font-size: $font-size-sm;
+        // Светлый цвет текста
         color: $text-color-light;
 
+        // Стили для кнопки-ссылки
         .linkLike {
+          // Прозрачный фон
           background: none;
+          // Убираем границу
           border: none;
+          // Цвет основного акцента
           color: $primary-color;
+          // Курсор-указатель
           cursor: pointer;
+          // Убираем отступы
           padding: 0;
+          // Полужирный шрифт
           font-weight: 600;
+          // Плавный переход для transform
           transition: transform 0.35s;
+
+          // Эффект при наведении
           &:hover {
+            // Поднимаем текст на 3px
             transform: translateY(-3px);
           }
         }
@@ -207,203 +352,309 @@
   }
 }
 
+// Анимация появления элементов
 @keyframes appearUp {
   from {
+    // Начальное состояние: прозрачный и смещенный вниз
     opacity: 0;
     transform: translateY(8px) scale(.995);
   }
+
   to {
+    // Конечное состояние: полностью видимый и на своем месте
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
 
+// Стили для фокуса кнопок (доступность)
 button:focus-visible,
 .authCard button:focus-visible {
+  // Контур фокуса с смешиванием цветов
   outline: 3px solid color-mix(in srgb, $primary-color 20%, $color-white);
+  // Отступ контура от элемента
   outline-offset: 3px;
 }
 
+// Контейнер для предпросмотра аватара
 .avatarPreview {
+  // Flexbox для горизонтального расположения
   display: flex;
   align-items: center;
+  // Расстояние между изображением и текстом
   gap: 12px;
+  // Внешние отступы
   margin: 8px 0 12px;
 
+  // Стили для изображения предпросмотра
   &__img {
+    // Размеры изображения
     width: 128px;
     height: 128px;
+    // Круглая форма
     border-radius: 50%;
+    // Обрезка изображения
     object-fit: cover;
+    // Качество рендеринга
     image-rendering: auto;
+    // Граница
     border: 2px solid $border-color;
   }
 
+  // Подсказка под изображением
   &__hint {
+    // Полупрозрачный текст
     opacity: 0.7;
   }
 }
 
+// Строка с полем загрузки файла
 .fileRow {
+  // Внешние отступы
   margin: 8px 0 12px;
 }
 
+// Скрытое поле ввода файла
 .fileInput {
+  // Абсолютное позиционирование для скрытия
   position: absolute;
+  // Минимальные размеры
   width: 1px;
   height: 1px;
+  // Убираем отступы
   padding: 0;
   margin: -1px;
+  // Скрываем переполнение
   overflow: hidden;
+  // Старые методы скрытия для поддержки браузеров
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
+  // Убираем границу
   border: 0;
 }
 
+// Стилизованная кнопка для загрузки файла
 .fileBtn {
+  // Flexbox для центрирования текста
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  // Внутренние отступы
   padding: $space-sm $space-md;
+  // Размер шрифта
   font-size: $font-size-md;
+  // Цвет фона (вторичный)
   background: $secondary-color;
+  // Цвет текста (инвертированный)
   color: $text-color-inverse;
+  // Скругление углов
   border-radius: $radius-md;
+  // Тень
   box-shadow: $shadow-sm;
+  // Плавные переходы
   transition: filter .2s ease, transform .1s ease;
 
+  // Эффект при наведении
   &:hover {
+    // Плавный переход для transform
     transition: transform 0.25s;
+    // Увеличиваем яркость
     filter: brightness(1.1);
+    // Курсор-указатель
     cursor: pointer;
+    // Поднимаем кнопку
     transform: translateY(-7px);
   }
 
+  // Эффект при нажатии
   &:active {
+    // Небольшое уменьшение
     transform: scale(.98);
   }
 }
 
-.authButton, .modalBtn, .updBtn {
+// Общие стили для кнопок с анимацией
+.authButton,
+.modalBtn,
+.updBtn {
+  // Плавный переход для transform
   transition: transform 0.35s;
+
+  // Эффект при наведении
   &:hover {
+    // Поднимаем кнопку
     transform: translateY(-5px);
   }
 }
 
+// Стили для сообщения об ошибке
 .error {
+  // Цвет ошибки
   color: #bc0000;
+  // Размер шрифта
   font-size: $font-size-lg;
+  // Относительное позиционирование
   position: relative;
+  // Центрирование по grid
   justify-self: center;
+  // Отступ сверху (25% высоты viewport)
   margin-top: 25vh;
+  // Выравнивание текста по центру
   text-align: center;
+  // Полужирный шрифт
   font-weight: 600;
 }
 
+// Контейнер для индикатора загрузки
 .loadingContainer {
+  // Flexbox с вертикальным направлением
   display: flex;
   flex-direction: row;
+  // Запрет переноса на новую строку
   flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
+  // Расстояние между элементами
   gap: 5px;
+  // Относительное позиционирование
   position: relative;
+  // Центрирование
   justify-self: center;
+  // Отступ сверху (15% высоты viewport)
   margin-top: 15vh;
 
+  // Текст загрузки
   .loading {
+    // Размер шрифта
     font-size: $font-size-xl;
+    // Насыщенность шрифта
     font-weight: 500;
   }
 
+  // Анимированный элемент "пончик"
   .donut {
+    // Размеры
     width: 32px;
     height: 32px;
+    // Прозрачная граница с цветной верхней частью
     border: 5px solid transparent;
     border-top: 5px solid #3498db;
+    // Круглая форма
     border-radius: 50%;
+    // Бесконечная анимация вращения
     animation: donutAnim 1.5s linear infinite;
   }
 }
 
+// Анимация вращения "пончика"
 @keyframes donutAnim {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
+// Медиа-запрос для больших планшетов и маленьких ноутбуков
 @media (max-width: $breakpoint-lg) {
   .header {
+    // Уменьшаем отступы
     padding: $space-md $space-md $space-sm;
     gap: $space-sm;
+    // Уменьшаем отрицательный отступ
     margin-top: -32px;
   }
 
   .userAvatarXL {
+    // Уменьшаем размер аватара
     width: 84px;
     height: 84px;
+    // Уменьшаем толщину границы
     border-width: 3px;
   }
 
   .displayName {
+    // Уменьшаем размер шрифта
     font-size: 24px;
   }
 
   .actions {
+    // Уменьшаем отступ сверху
     margin-top: 20px;
   }
 
   .kpis {
+    // Изменяем grid layout
     grid-template-columns: repeat(3, minmax(120px, 1fr));
     gap: $space-sm;
   }
 
   .cover {
+    // Уменьшаем высоту обложки
     height: 110px;
   }
 }
 
+// Медиа-запрос для планшетов
 @media (max-width: $breakpoint-md) {
   .header {
+    // Меняем направление flexbox на вертикальное
     flex-direction: column;
+    // Выравнивание по началу
     align-items: flex-start;
+    // Выравнивание текста по левому краю
     text-align: left;
     gap: $space-sm;
+    // Корректируем отрицательный отступ
     margin-top: -30px;
   }
 
   .identity {
+    // Ширина 100%
     width: 100%;
     align-items: center;
     gap: $space-sm;
   }
 
   .nameBlock {
+    // Уменьшаем отступ сверху
     margin-top: 8px;
   }
 
   .displayName {
+    // Уменьшаем размер шрифта
     font-size: 22px;
   }
 
   .actions {
+    // Ширина 100%
     width: 100%;
+    // Выравнивание по правому краю
     justify-content: flex-end;
+    // Корректируем отступ
     margin-top: -30px;
     gap: $space-sm;
+    // Flexbox свойства
     display: flex;
     align-items: center;
     flex-wrap: wrap;
+
+    // Уменьшаем отступы кнопок
     button {
       padding: 8px 12px;
     }
   }
 
   .kpis {
+    // 2 колонки вместо 3
     grid-template-columns: repeat(2, minmax(120px, 1fr));
   }
 
   .avatarPreview {
+
+    // Уменьшаем размер предпросмотра аватара
     &__img {
       width: 96px;
       height: 96px;
@@ -411,70 +662,93 @@ button:focus-visible,
   }
 
   .cover {
+    // Уменьшаем высоту обложки
     height: 100px;
   }
 
   .error {
+    // Корректируем отступ
     margin-top: 18vh;
   }
 
   .loadingContainer {
+    // Корректируем отступ
     margin-top: 12vh;
   }
 }
 
+// Медиа-запрос для мобильных телефонов
 @media (max-width: $breakpoint-sm) {
   .header {
+    // Центрируем содержимое
     align-items: center;
     text-align: center;
+    // Уменьшаем отступы
     padding: $space-md 12px $space-sm;
+    // Корректируем отрицательный отступ
     margin-top: -28px;
   }
 
   .identity {
+    // Вертикальное расположение
     flex-direction: column;
     gap: $space-sm;
   }
 
   .userAvatarXL {
+    // Уменьшаем размер аватара
     width: 72px;
     height: 72px;
+    // Уменьшаем толщину границы
     border-width: 3px;
   }
 
   .nameBlock {
+    // Уменьшаем отступ
     margin-top: 6px;
   }
 
   .displayName {
+    // Уменьшаем размер шрифта
     font-size: 20px;
   }
 
   .username {
+    // Уменьшаем размер шрифта
     font-size: $font-size-sm;
   }
 
   .actions {
+    // Ширина 100%
     width: 100%;
+    // Центрируем кнопки
     justify-content: center;
+    // Корректируем отступ
     margin-top: 10px;
     gap: $space-sm;
+
+    // Делаем кнопки блочными
     button {
       width: 100%;
+      // Максимальная ширина
       max-width: 260px;
     }
   }
 
   .kpis {
+    // 1 колонка вместо 2
     grid-template-columns: 1fr;
     gap: $space-sm;
   }
 
   .userStatCardWrap {
+    // Отступ сверху
     margin-top: $space-sm;
   }
 
   .avatarPreview {
+
+    // Уменьшаем размер предпросмотра аватара
     &__img {
       width: 80px;
       height: 80px;
@@ -482,25 +756,90 @@ button:focus-visible,
   }
 
   .cover {
+    // Уменьшаем высоту обложки
     height: 90px;
   }
 
   .error {
+    // Корректируем отступ и размер
     margin-top: 12vh;
     font-size: $font-size-md;
+    // Добавляем боковые отступы
     padding: 0 12px;
   }
 
   .loadingContainer {
+    // Вертикальное расположение
     flex-direction: column;
     gap: 8px;
+    // Корректируем отступ
     margin-top: 10vh;
   }
 
   .authContainer {
+    // Уменьшаем отступы
     padding: $space-md 8px;
+
     .authCard {
+      // Уменьшаем внутренние отступы
       padding: $space-md;
     }
   }
 }
+
+
+
+
+// =====================================================
+// ПОЯСНЕНИЯ К КОММЕНТАРИЯМ В КОДЕ:
+// =====================================================
+
+// 1. АДАПТИВНЫЙ ДИЗАЙН И BREAKPOINTS:
+//    - 3 уровня адаптивности: lg, md, sm
+//    - Постепенное упрощение layout на меньших экранах
+//    - Использование переменных для согласованности
+
+// 2. ТИПОГРАФИЧЕСКАЯ ИЕРАРХИЯ:
+//    - displayName: 28px → 24px → 22px → 20px
+//    - username: $font-size-sm с постоянным размером
+//    - Четкое различие между важной и второстепенной информацией
+
+// 3. FLEXBOX И GRID LAYOUT:
+//    - Flexbox для линейного расположения элементов
+//    - Grid для равномерного распределения KPI показателей
+//    - Плавная трансформация между разными layout
+
+// 4. АНИМАЦИИ И МИКРОВЗАИМОДЕЙСТВИЯ:
+//    - appearUp для плавного появления элементов
+//    - hover эффекты для интерактивности
+//    - donutAnim для индикатора загрузки
+
+// 5. ДОСТУПНОСТЬ (ACCESSIBILITY):
+//    - focus-visible для клавиатурной навигации
+//    - Правильные контрасты цветов
+//    - Семантическая структура
+
+// 6. ВИЗУАЛЬНАЯ ИЕРАРХИЯ:
+//    - Градиенты для создания глубины
+//    - Тени для отделения элементов
+//    - Отступы для создания пространства
+
+// 7. УПРАВЛЕНИЕ РАЗМЕРАМИ И ПРОПОРЦИЯМИ:
+//    - min() и max() функции для responsive sizing
+//    - Процентные и viewport-relative единицы
+//    - Плавное масштабирование элементов
+
+// 8. ЦВЕТОВАЯ ПАЛИТРА И БРЕНДИНГ:
+//    - Использование переменных дизайн-системы
+//    - Градиенты создают современный вид
+//    - Согласованность с общим стилем приложения
+
+// 9. ОБРАБОТКА РАЗЛИЧНЫХ СОСТОЯНИЙ:
+//    - Загрузка, ошибка, успех
+//    - Авторизован/неавторизован
+//    - Разные размеры экранов
+
+// 10. ПРОИЗВОДИТЕЛЬНОСТЬ И ОПТИМИЗАЦИЯ:
+//     - Эффективное использование CSS
+//     - Минимальное количество медиа-запросов
+//     - Современные CSS features

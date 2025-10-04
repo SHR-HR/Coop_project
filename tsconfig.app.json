@@ -1,27 +1,81 @@
 {
   "compilerOptions": {
+    // Путь к файлу с информацией о сборке TypeScript для инкрементальной компиляции
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    // Целевая версия ECMAScript для компиляции (ES2022 = ES13)
     "target": "ES2022",
+    // Использование современного синтаксиса для полей класса (вместо defineProperty)
     "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // Библиотеки TypeScript: ES2022, DOM API, DOM Iterable (для for...of по DOM коллекциям)
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    // Система модулей: ESNext (самая современная)
     "module": "ESNext",
+    // Пропуск проверки типов в файлах деклараций (.d.ts) для ускорения компиляции
     "skipLibCheck": true,
-
-    /* Bundler mode */
+    /* Bundler mode - настройки для работы с современными сборщиками */
+    // Стратегия разрешения модулей, оптимизированная для сборщиков (Vite, Webpack)
     "moduleResolution": "bundler",
+    // Разрешение импорта TypeScript файлов с расширениями .ts, .tsx
     "allowImportingTsExtensions": true,
+    // Сохранение синтаксиса импорта/экспорта как есть (без преобразования в require)
     "verbatimModuleSyntax": true,
+    // Принудительное определение модулей (все файлы считаются модулями)
     "moduleDetection": "force",
+    // Не генерировать файлы .js (Vite занимается компиляцией)
     "noEmit": true,
+    // Режим JSX: react-jsx (современный синтаксис без импорта React)
     "jsx": "react-jsx",
-
-    /* Linting */
+    /* Linting - строгие проверки кода */
+    // Включение всех строгих проверок TypeScript
     "strict": true,
+    // Ошибка при неиспользуемых локальных переменных
     "noUnusedLocals": true,
+    // Ошибка при неиспользуемых параметрах функций
     "noUnusedParameters": true,
+    // Разрешение только стираемого синтаксиса (совместимость с транспиляцией)
     "erasableSyntaxOnly": true,
+    // Ошибка при отсутствии break в case блоках switch
     "noFallthroughCasesInSwitch": true,
+    // Проверка side-effect импортов
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  // Включение только файлов из папки src для компиляции
+  "include": [
+    "src"
+  ]
 }
+/* ===== ПОЯСНЕНИЯ К КОММЕНТАРИЯМ ДЛЯ tsconfig.app.json ===== */
+/*
+1. Назначение файла:
+   - Конфигурация TypeScript для клиентской части приложения (React компоненты)
+   - Оптимизирована для современных браузеров и сборщиков
+
+2. Target ES2022:
+   - Поддержка современных возможностей JavaScript
+   - Включает: top-level await, private fields, static blocks
+   - Оптимальный баланс между функциональностью и поддержкой браузеров
+
+3. Bundler mode особенности:
+   - moduleResolution: "bundler" - понимает как работают современные сборщики
+   - allowImportingTsExtensions - импорт .ts/.tsx файлов напрямую
+   - verbatimModuleSyntax - сохранение tree-shaking возможностей
+
+4. React JSX трансформация:
+   - jsx: "react-jsx" - автоматически импортирует jsx runtime
+   - Не требует импорта React в каждом файле с JSX
+   - Современный подход React 17+
+
+5. Строгие проверки:
+   - strict: true - включает все строгие проверки TypeScript
+   - noUnusedLocals/Parameters - поддерживает чистоту кода
+   - noFallthroughCasesInSwitch - предотвращает ошибки в switch
+
+6. NoEmit стратегия:
+   - Vite занимается компиляцией TypeScript
+   - TypeScript только проверяет типы
+   - Ускорение процесса разработки
+*/

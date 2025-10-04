@@ -1,76 +1,205 @@
+// Импорт функций createAsyncThunk и createSlice из Redux Toolkit для создания асинхронных действий и срезов состояния
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type {PayloadAction} from "@reduxjs/toolkit"
+// Импорт типа PayloadAction для типизации действий с полезной нагрузкой
+import type { PayloadAction } from "@reduxjs/toolkit"
+// Импорт API объекта для выполнения запросов к серверу
 import { api } from "../../api/api.ts";
+// Импорт типов Task, TaskCreatePayload, Credentials из файла с типами
 import type { Task, TaskCreatePayload, Credentials } from "../../shared/types/types";
+// Импорт типа RootState для типизации состояния всего хранилища
 import type { RootState } from "../store";
 
-
+// Определение интерфейса для состояния задач
 interface TasksState {
+    // Массив созданных задач
     tasks: Task[];
+    // Статус загрузки с четырьмя возможными состояниями
     loading: 'idle' | 'pending' | 'succeeded' | 'failed';
+    // Сообщение об ошибке или null если ошибок нет
     error: string | null;
 }
 
-
+// Начальное состояние для среза задач
 const initialState: TasksState = {
+    // Пустой массив задач по умолчанию
     tasks: [],
+    // Статус загрузки 'idle' (бездействие) по умолчанию
     loading: 'idle',
+    // Ошибок нет по умолчанию
     error: null,
 };
 
-
+// Создание асинхронного действия для создания новой задачи
+// Дженерик параметры:
+// - первый: тип возвращаемого значения при успехе (Task - созданная задача)
+// - второй: тип аргументов (TaskCreatePayload - данные для создания задачи)
+// - третий: тип конфигурации с state: RootState и rejectValue: string
 export const createTask = createAsyncThunk<
     Task,
     TaskCreatePayload,
     { state: RootState; rejectValue: string }
->(
-    "tasks/createTask",
-    async (taskData, { getState, rejectWithValue }) => {
-        const { username, password, isAuthenticated } = getState().auth;
+>
+    // Название действия и асинхронная функция-исполнитель
+    (
+        "tasks/createTask",
+        async (taskData, { getState, rejectWithValue }) => {
+            // Получение состояния аутентификации из глобального состояния
+            const { username, password, isAuthenticated } = getState().auth;
 
-        try {
-            if (!isAuthenticated) {
-                return rejectWithValue("Доступ запрещён: войдите в систему");
+            // Блок try для обработки успешного выполнения
+            try {
+                // Проверка аутентификации пользователя
+                if (!isAuthenticated) {
+                    // Возврат ошибки с сообщением о необходимости авторизации
+                    return rejectWithValue("Доступ запрещён: войдите в систему");
+                }
+                // Создание объекта учетных данных
+                const creds: Credentials = { username, password };
+
+                // Вызов API метода для создания задачи с переданными данными и учетными данными
+                const data = await api.tasksApi.createTask(taskData, creds);
+                // Возврат созданной задачи
+                return data;
+                // Блок catch для обработки ошибок
+            } catch (error: any) {
+                // Получение статуса ошибки из ответа сервера
+                const status = error?.response?.status;
+                // Проверка если статус ошибки 401 (неавторизован)
+                if (status === 401) {
+                    // Возврат ошибки с сообщением о необходимости авторизации
+                    return rejectWithValue("Доступ запрещён: войдите в систему");
+                }
+                // Возврат детали ошибки из ответа сервера или общего сообщения об ошибке
+                return rejectWithValue(
+                    error?.response?.data?.detail || "Ошибка создания задачи"
+                );
             }
-            const creds: Credentials = { username, password };
-            
-            const data = await api.tasksApi.createTask(taskData, creds);
-            return data;
-        } catch (error: any) {
-            const status = error?.response?.status;
-            if (status === 401) {
-                return rejectWithValue("Доступ запрещён: войдите в систему");
-            }
-            return rejectWithValue(
-                error?.response?.data?.detail || "Ошибка создания задачи"
-            );
         }
-    }
-);
+    );
 
+// Создание среза (slice) для управления состоянием задач
 const tasksSlice = createSlice({
+    // Уникальное имя среза
     name: "tasks",
+    // Начальное состояние
     initialState,
+    // Синхронные редюсеры (редюсеры для синхронных действий) - пустой объект, нет синхронных действий
     reducers: {
     },
+    // Дополнительные редюсеры для обработки асинхронных действий
     extraReducers: (builder) => {
+        // Использование builder для цепочного добавления обработчиков
         builder
+            // Обработчик для состояния pending (запрос выполняется) действия createTask
             .addCase(createTask.pending, (state) => {
+                // Установка статуса загрузки в 'pending' (выполняется)
                 state.loading = 'pending';
+                // Очистка предыдущих ошибок
                 state.error = null;
             })
+            // Обработчик для состояния fulfilled (запрос успешно завершен) действия createTask
             .addCase(createTask.fulfilled, (state, action: PayloadAction<Task>) => {
+                // Установка статуса загрузки в 'succeeded' (успешно завершено)
                 state.loading = 'succeeded';
+                // Добавление созданной задачи в массив tasks
                 state.tasks.push(action.payload);
             })
+            // Обработчик для состояния rejected (запрос завершен с ошибкой) действия createTask
             .addCase(createTask.rejected, (state, action) => {
+                // Установка статуса загрузки в 'failed' (завершено с ошибкой)
                 state.loading = 'failed';
+                // Сохранение ошибки из payload или использование сообщения по умолчанию
                 state.error = action.payload as string ?? "Неизвестная ошибка";
             });
     },
 });
 
-
+// Селектор для получения всего состояния задач
 export const selectTasksState = (state: RootState) => state.tasks;
 
+// Экспорт редюсера по умолчанию для использования в хранилище
 export default tasksSlice.reducer;
+
+
+
+
+/* ===== ПОЯСНЕНИЯ К КОММЕНТАРИЯМ ===== */
+
+/*
+1. Интерфейс состояния задач:
+   - tasks: Task[] - массив созданных задач для локального кэширования
+   - loading: 'idle' | 'pending' | 'succeeded' | 'failed' - детализированный статус загрузки с 4 состояниями
+   - error: string | null - сообщение об ошибке для пользовательского интерфейса
+
+2. Начальное состояние:
+   - tasks: [] - пустой массив, так как изначально задач нет
+   - loading: 'idle' - начальное состояние бездействия
+   - error: null - отсутствие ошибок при инициализации
+
+3. Асинхронное действие createTask:
+   - Принимает taskData типа TaskCreatePayload (данные для создания задачи)
+   - Использует getState для доступа к состоянию аутентификации
+   - Выполняет проверку аутентификации перед вызовом API
+
+4. Логика аутентификации в createTask:
+   - Получение username, password, isAuthenticated из состояния auth
+   - Явная проверка isAuthenticated перед выполнением запроса
+   - Создание объекта creds только при успешной аутентификации
+
+5. Обработка ошибок в createTask:
+   - Двойная проверка аутентификации (в коде и через статус 401 от сервера)
+   - Использование error?.response?.data?.detail для детализированных сообщений от сервера
+   - Fallback сообщение "Ошибка создания задачи" на русском языке
+
+6. Структура среза tasksSlice:
+   - name: "tasks" - идентификатор для Redux DevTools
+   - initialState - начальное состояние с пустым массивом задач
+   - reducers: {} - пустой объект, так как нет синхронных действий
+   - extraReducers - обработка асинхронного действия createTask
+
+7. Обработка состояний в extraReducers:
+   - createTask.pending: установка loading в 'pending' и очистка ошибок
+   - createTask.fulfilled: установка loading в 'succeeded' и добавление задачи в массив
+   - createTask.rejected: установка loading в 'failed' и сохранение ошибки
+
+8. Детализированный статус загрузки:
+   - 'idle' - начальное состояние, запросов не было
+   - 'pending' - запрос выполняется
+   - 'succeeded' - запрос успешно завершен
+   - 'failed' - запрос завершен с ошибкой
+   - Более информативный чем простой boolean
+
+9. Обновление состояния при успешном создании:
+   - state.tasks.push(action.payload) - добавление созданной задачи в конец массива
+   - Иммутабельное обновление благодаря Immer (встроен в Redux Toolkit)
+   - Сохранение созданных задач для возможного последующего использования
+
+10. Обработка ошибок в rejected состоянии:
+    - action.payload as string - приведение типа для TypeScript
+    - ?? "Неизвестная ошибка" - оператор нулевого слияния для fallback сообщения
+    - Сохранение ошибки для отображения в пользовательском интерфейсе
+
+11. Селекторы:
+    - selectTasksState - получение всего состояния задач
+    - Позволяет компонентам подписываться на все изменения состояния создания задач
+
+12. Особенности безопасности:
+    - Двойная проверка аутентификации (клиентская и серверная)
+    - Передача учетных данных в каждом запросе
+    - Сообщения об ошибках на русском языке для лучшего UX
+
+13. Архитектурные решения:
+    - Отдельный срез для операций создания задач
+    - Локальное хранение созданных задач в состоянии
+    - Детализированный статус загрузки для точного отображения состояния UI
+
+14. Пользовательский опыт:
+    - Четкие сообщения об ошибках на родном языке
+    - Детализированные статусы загрузки для информирования пользователя
+    - Локальное обновление интерфейса после успешного создания задачи
+
+15. Оптимизация:
+    - Локальное кэширование созданных задач
+    - Минимальные изменения состояния для каждого действия
+    - Эффективная обработка ошибок с приоритетом серверных сообщений
+*/

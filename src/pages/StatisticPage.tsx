@@ -1,26 +1,37 @@
+// Импорт хуков из React для работы с состоянием, эффектами и мемоизацией
 import { useEffect, useMemo, useState } from "react";
+// Импорт главного layout компонента для структуры страницы
 import MainLayout from "../layouts/MainLayout";
+// Импорт компонента кнопки из shared UI компонентов
 import Button from "../shared/ui/Button/Button";
+// Импорт хуков Redux для работы с состоянием приложения
 import { useDispatch, useSelector } from "react-redux";
+// Импорт TypeScript типов для Redux store
 import type { AppDispatch, RootState } from "../store/store";
 
-import u from "../features/dashboard/ui.module.scss";
-import s from "./StatisticPage.module.scss";
+// Импорт стилей из различных SCSS модулей
+import u from "../features/dashboard/ui.module.scss";  // Общие UI стили для дашборда
+import s from "./StatisticPage.module.scss";           // Стили конкретно для этой страницы
 
+// Импорт компонентов дашборда для отображения различных блоков статистики
 import TrendsPanel from "../features/dashboard/Trends/TrendsPanel";
 import CompletedDistribution from "../features/dashboard/Distribution/CompletedDistribution";
 
+// Импорт actions, селекторов и типов из statistics slice
 import {
-  fetchGlobalStatistic,
-  fetchMyStatistic,
-  selectStatistics,
-  setSortMode,
-  type SortMode,
+  fetchGlobalStatistic,    // Action для загрузки глобальной статистики
+  fetchMyStatistic,        // Action для загрузки статистики текущего пользователя
+  selectStatistics,        // Селектор для получения всего состояния статистики
+  setSortMode,             // Action для установки режима сортировки
+  type SortMode,           // TypeScript тип для режимов сортировки
 } from "../store/slices/statisticsSlice";
 
+// Импорт селекторов из auth slice для проверки аутентификации
 import { selectIsAuthenticated } from "../store/slices/authSlice";
+// Импорт селектора для получения профиля текущего пользователя
 import { selectProfile } from "../store/slices/profileSlice";
 
+// Импорт UI компонентов для визуализации данных
 import ChartDonut from "../shared/ui/ChartDonut/ChartDonut";
 import UserStatCard from "../features/dashboard/UserStatCard/UserStatCard";
 import UsersTable from "../features/dashboard/UsersTable/UsersTable";
@@ -30,40 +41,51 @@ import MyRankBadge from "../features/dashboard/MyRankBadge/MyRankBadge";
 import Podium from "../features/dashboard/Podium/Podium";
 import Tooltip from "../shared/ui/Tooltip/Tooltip";
 
+// Импорт утилит для экспорта данных в различные форматы
 import { exportUsersStatToCSV } from "../shared/utils/csv";
 import { exportUsersStatToXLSX } from "../shared/utils/xlsxExport";
 import { exportUsersStatToJSON } from "../shared/utils/jsonExport";
 import { copyUsersStatToClipboardTSV } from "../shared/utils/clipboard";
+// Импорт TypeScript типа для статистики пользователя
 import type { UserStatistic } from "../shared/types/types";
 
+// Импорт мемоизированных селекторов для работы с данными статистики
 import {
-  makeSelectPaginated,
-  makeSelectSorted,
-  selectGlobalTotals,
-  selectGlobalKpis,
+  makeSelectPaginated,    // Селектор для пагинации данных
+  makeSelectSorted,       // Селектор для сортировки данных
+  selectGlobalTotals,     // Селектор для глобальных сумм
+  selectGlobalKpis,       // Селектор для KPI показателей
 } from "../store/selectors/statisticsSelectors";
 
+// Основной компонент страницы статистики
 export default function StatisticPage() {
+  // Инициализация dispatch для отправки actions в Redux store
   const dispatch = useDispatch<AppDispatch>();
 
+  // Получение состояния аутентификации и данных пользователя из Redux store
   const isAuth = useSelector(selectIsAuthenticated);
   const me = useSelector(selectProfile);
   const { loading, error, sortMode } = useSelector(selectStatistics);
 
+  // Эффект для загрузки данных при монтировании компонента
   useEffect(() => {
-    dispatch(fetchGlobalStatistic());
-    if (isAuth) dispatch(fetchMyStatistic());
+    dispatch(fetchGlobalStatistic());        // Загрузка глобальной статистики
+    if (isAuth) dispatch(fetchMyStatistic()); // Загрузка статистики текущего пользователя если авторизован
   }, [dispatch, isAuth]);
 
+  // Состояние для хранения времени последнего визита пользователя
   const [lastVisit, setLastVisit] = useState<Date | null>(null);
   useEffect(() => {
+    // Чтение предыдущего времени визита из localStorage
     const prevISO = localStorage.getItem("dashboard:lastVisit");
     if (prevISO) setLastVisit(new Date(prevISO));
+    // Сохранение текущего времени визита в localStorage
     localStorage.setItem("dashboard:lastVisit", new Date().toISOString());
   }, []);
 
-  // Вид / поиск / пагинация / режим "только активные"
+  // Состояния для управления видом, поиском, пагинацией и фильтрами
   const [view, setView] = useState<"cards" | "table">(
+    // Восстановление сохраненного вида из localStorage или значение по умолчанию "cards"
     (localStorage.getItem("dashboard:view") as "cards" | "table") || "cards"
   );
   const [query, setQuery] = useState(localStorage.getItem("dashboard:query") || "");
@@ -72,12 +94,15 @@ export default function StatisticPage() {
   const [onlyActive, setOnlyActive] = useState<boolean>(false);
   const [copyOk, setCopyOk] = useState<null | string>(null);
 
+  // Эффекты для сохранения состояния в localStorage
   useEffect(() => { localStorage.setItem("dashboard:view", view); }, [view]);
   useEffect(() => { localStorage.setItem("dashboard:query", query); }, [query]);
 
+  // Мемоизация селекторов для предотвращения лишних пересчетов
   const selectSorted = useMemo(() => makeSelectSorted(), []);
   const selectPaginated = useMemo(() => makeSelectPaginated(), []);
 
+  // Получение данных через селекторы из Redux store
   const globalTotals = useSelector(selectGlobalTotals);
   const kpis = useSelector(selectGlobalKpis);
   const sorted = useSelector((s: RootState) => selectSorted(s, query, sortMode, onlyActive));
@@ -85,23 +110,25 @@ export default function StatisticPage() {
     selectPaginated(s, query, sortMode, onlyActive, page, pageSize)
   );
 
+  // Синхронизация текущей страницы при изменении данных
   useEffect(() => { if (page !== currentPage) setPage(currentPage); }, [currentPage, page]);
 
-  // Actions
+  // Функция для установки режима сортировки
   const setSort = (mode: SortMode) => {
-    dispatch(setSortMode(mode));
-    setPage(1);
-    localStorage.setItem("dashboard:sortMode", mode);
+    dispatch(setSortMode(mode));  // Отправка action в Redux
+    setPage(1);                   // Сброс на первую страницу
+    localStorage.setItem("dashboard:sortMode", mode);  // Сохранение в localStorage
   };
 
-  // Быстрые "Топ N": включаем onlyActive + сортировку по выполненным
+  // Функция для показа топ-N пользователей
   const showTop = (n: 1 | 3 | 5) => {
-    setOnlyActive(true);
-    setSort("completedDesc");
-    setPageSize(n);
-    setPage(1);
+    setOnlyActive(true);          // Показывать только активных пользователей
+    setSort("completedDesc");     // Сортировка по выполненным задачам (по убыванию)
+    setPageSize(n);               // Установка размера страницы равным N
+    setPage(1);                   // Сброс на первую страницу
   };
 
+  // Обработчики для экспорта данных
   const handleExportCSVAll = () => exportUsersStatToCSV(sorted);
   const handleExportCSVPage = () => exportUsersStatToCSV(paginated, { filenameBase: "dashboard_stats_current_page" });
   const handleExportXLSXAll = () => {
@@ -124,6 +151,7 @@ export default function StatisticPage() {
     }
   };
   const handleResetView = () => {
+    // Очистка всех сохраненных настроек из localStorage
     localStorage.removeItem("dashboard:view");
     localStorage.removeItem("dashboard:query");
     localStorage.removeItem("dashboard:lastVisit");
@@ -136,12 +164,13 @@ export default function StatisticPage() {
     localStorage.removeItem("dashboard:history:v1");
   };
 
+  // Рендеринг компонента
   return (
     <MainLayout>
       <div className={s.page}>
         <h1>Дашборд</h1>
 
-        {/* KPI */}
+        {/* Блок KPI показателей */}
         <StatsHeader
           total={kpis.total}
           completed={kpis.completed}
@@ -152,19 +181,20 @@ export default function StatisticPage() {
           topName={kpis.top?.name ?? null}
         />
 
-        {/* Динамика + Лидерборд */}
+        {/* Блок динамики и лидерборда */}
         <WeeklyDelta />
         <div style={{ margin: "8px 0 14px" }}>
           <Podium />
         </div>
 
+        {/* Отображение времени последнего визита */}
         {lastVisit && (
           <div style={{ opacity: 0.7, marginTop: 4 }}>
             Последний визит: {lastVisit.toLocaleString()}
           </div>
         )}
 
-        {/* Верхняя полоса: поиск слева, мой ранг справа */}
+        {/* Верхняя панель с поиском и бейджем ранга */}
         <div className={s.topbar}>
           <input
             className={u.input}
@@ -177,8 +207,9 @@ export default function StatisticPage() {
           </Tooltip>
         </div>
 
-        {/* Тулбар */}
+        {/* Панель инструментов с кнопками управления */}
         <div className={s.toolbar}>
+          {/* Переключение между видами отображения */}
           <Tooltip label="Карточки пользователей">
             <Button className={u.btn} variant={view === "cards" ? "primary" : "secondary"} onClick={() => setView("cards")}>Карточки</Button>
           </Tooltip>
@@ -187,6 +218,7 @@ export default function StatisticPage() {
             <Button className={u.btn} variant={view === "table" ? "primary" : "secondary"} onClick={() => setView("table")}>Таблица</Button>
           </Tooltip>
 
+          {/* Кнопки сортировки */}
           <Tooltip label="Сортировать по выполненным ↓">
             <Button className={u.btn} variant="secondary" onClick={() => setSort("completedDesc")}>Сортировать по выполнено ↓</Button>
           </Tooltip>
@@ -202,6 +234,7 @@ export default function StatisticPage() {
 
           <div style={{ flex: 1 }} />
 
+          {/* Кнопки экспорта и управления */}
           <Tooltip label="Обновить данные">
             <Button className={u.btn} variant="secondary" onClick={() => dispatch(fetchGlobalStatistic())}>Обновить</Button>
           </Tooltip>
@@ -228,12 +261,13 @@ export default function StatisticPage() {
           </Tooltip>
         </div>
 
-        {/* Панель: счётчики и Top-N */}
+        {/* Панель мета-информации и быстрых фильтров */}
         <div className={s.meta}>
           <span>Найдено пользователей: <b>{total}</b></span>
           <span className={s.divider} />
           <span>Показывать: </span>
 
+          {/* Кнопки быстрого доступа к топам */}
           <Tooltip label="Показать только лидера (с задачами)">
             <Button className={u.btn} variant={pageSize === 1 && onlyActive ? "primary" : "secondary"} onClick={() => showTop(1)}>Топ 1</Button>
           </Tooltip>
@@ -244,18 +278,20 @@ export default function StatisticPage() {
             <Button className={u.btn} variant={pageSize === 5 && onlyActive ? "primary" : "secondary"} onClick={() => showTop(5)}>Топ 5</Button>
           </Tooltip>
 
-          {/* Кнопка “Все” — вернуть обычный режим */}
+          {/* Кнопка отображения всех пользователей */}
           <Tooltip label="Показать всех пользователей">
             <Button className={u.btn} variant={!onlyActive ? "primary" : "secondary"} onClick={() => { setOnlyActive(false); setPage(1); }}>Все</Button>
           </Tooltip>
 
+          {/* Индикатор успешного копирования */}
           {copyOk && <span style={{ color: "#27ae60" }}>{copyOk}</span>}
         </div>
 
+        {/* Индикаторы загрузки и ошибок */}
         {loading && <div>Загрузка…</div>}
         {error && <div style={{ color: "red" }}>{error}</div>}
 
-        {/* Глобальная сводка */}
+        {/* Блок глобальной сводки с круговой диаграммой */}
         {!loading && !error && (
           <section aria-label="Глобальная сводка" style={{ margin: "12px 0 12px" }}>
             <h3 style={{ margin: "6px 0" }}>Глобальная сводка</h3>
@@ -269,10 +305,11 @@ export default function StatisticPage() {
           </section>
         )}
 
+        {/* Компоненты трендов и распределения */}
         <TrendsPanel />
         <CompletedDistribution />
 
-        {/* Контент */}
+        {/* Основной контент - карточки или таблица */}
         {!loading && !error && sorted.length === 0 && (
           <div style={{ opacity: 0.7, marginTop: 12 }}>
             Нет данных для отображения. Создайте задачи на других страницах, чтобы здесь появились цифры.
@@ -282,6 +319,7 @@ export default function StatisticPage() {
         {!loading && !error && sorted.length > 0 && (
           <>
             {view === "cards" ? (
+              // Отображение в виде карточек
               <div className={s.cardsGrid}>
                 {paginated.map((u, i) => {
                   const isMe = !!(me && u.name === me.name);
@@ -307,6 +345,7 @@ export default function StatisticPage() {
                 })}
               </div>
             ) : (
+              // Отображение в виде таблицы
               <UsersTable
                 data={paginated as UserStatistic[]}
                 sortMode={sortMode}
@@ -332,3 +371,60 @@ export default function StatisticPage() {
 }
 
 
+
+// =====================================================
+// ПОЯСНЕНИЯ К КОММЕНТАРИЯМ В КОДЕ:
+// =====================================================
+
+// 1. АРХИТЕКТУРА КОМПОНЕНТА:
+//    - StatisticPage - главная страница дашборда со статистикой
+//    - Использует MainLayout для общей структуры страницы
+//    - Состоит из множества smaller components для модульности
+
+// 2. УПРАВЛЕНИЕ СОСТОЯНИЕМ:
+//    - Redux для глобального состояния (статистика, аутентификация)
+//    - Local State для UI состояния (вид, поиск, пагинация)
+//    - localStorage для сохранения пользовательских предпочтений
+
+// 3. DATA FLOW И СЕЛЕКТОРЫ:
+//    - Мемоизированные селекторы для эффективного получения данных
+//    - Цепочка преобразований: фильтрация → сортировка → пагинация
+//    - Автоматическая синхронизация состояния пагинации
+
+// 4. ЭКСПОРТ ДАННЫХ:
+//    - Поддержка multiple форматов: CSV, XLSX, JSON, TSV
+//    - Обработка ошибок с пользовательскими сообщениями
+//    - Интерактивная обратная связь (copyOk состояние)
+
+// 5. ПОЛЬЗОВАТЕЛЬСКИЙ ИНТЕРФЕЙС:
+//    - Два режима отображения: карточки и таблица
+//    - Гибкая система сортировки и фильтрации
+//    - Быстрый доступ к топам (1, 3, 5)
+//    - Tooltip для улучшения UX
+
+// 6. ВИЗУАЛИЗАЦИЯ ДАННЫХ:
+//    - KPI панель с ключевыми показателями
+//    - Круговая диаграмма для глобальной статистики
+//    - Тренды и распределения для аналитики
+//    - Лидерборд и подиум для мотивации
+
+// 7. ОБРАБОТКА ОШИБОК И ЗАГРУЗКИ:
+//    - Индикаторы загрузки во время запросов
+//    - Отображение ошибок в понятном формате
+//    - Graceful degradation при отсутствии данных
+
+// 8. ДОСТУПНОСТЬ И SEO:
+//    - Семантическая HTML разметка (section, article, h1-h3)
+//    - aria-label для скринридеров
+//    - Правильная структура заголовков
+
+// 9. ПРОИЗВОДИТЕЛЬНОСТЬ:
+//    - useMemo для мемоизации селекторов
+//    - useEffect с правильными зависимостями
+//    - Ленивая загрузка данных только при необходимости
+
+// 10. UX/UI ОСОБЕННОСТИ:
+//     - Сохранение состояния между сессиями
+//     - Быстрые действия (топы, сброс)
+//     - Визуальная обратная связь для всех действий
+//     - Адаптивный дизайн для разных устройств
